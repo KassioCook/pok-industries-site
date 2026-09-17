@@ -86,6 +86,14 @@ stratégie et n'incluait pas la stratégie legacy — jugé inutile dans sa form
 - **Ticker SOL** dans le header (prix + variation, légère fluctuation simulée
   toutes les 4s) à la place d'un simple wallet suivi affiché en dur.
 
+- **Lien Tâches ⇄ Stratégie** : une config dans "Tâches" et sa tuile/page dans
+  "Stratégie" sont la même entité (même `data-strategy`). Modifier le nom, le
+  wallet acheteur ou la description via le bouton ✎ "Modifier" (dans Tâches)
+  met à jour les deux endroits en même temps, et c'est sauvegardé dans
+  `localStorage` (`b10k_task_overrides`) donc ça survit à un rechargement.
+  Chaque stratégie a maintenant une **description texte** de sa logique
+  (règles A/B/C/D), affichée dans sa page détail et éditable depuis la modale.
+
 ## Pour brancher sur le vrai bot plus tard
 
 Discuté avec l'utilisateur — pas fait pour l'instant, juste noté pour plus tard :

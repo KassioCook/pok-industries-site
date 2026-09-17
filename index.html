@@ -336,6 +336,9 @@
   .param-chip .k { color: var(--text-muted); }
   .param-chip .v { font-family: var(--font-mono); color: var(--text-primary); font-weight: 600; font-variant-numeric: tabular-nums; }
 
+  .desc-text { margin: 0; font-size: 13px; line-height: 1.55; color: var(--text-secondary); }
+  .desc-text b { color: var(--text-primary); font-family: var(--font-mono); font-weight: 600; }
+
   .token-list { display: flex; flex-direction: column; margin-top: 10px; }
   .token-row { display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; padding: 11px 0; border-bottom: 1px solid var(--border); }
   .token-row:last-child { border-bottom: none; }
@@ -516,6 +519,12 @@
     color: var(--text-primary); font-family: var(--font-mono); font-size: 13px; outline: none;
   }
   .modal-field input:focus { border-color: var(--brand-red); }
+  .modal-field textarea {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 9px; padding: 9px 11px;
+    color: var(--text-primary); font-family: var(--font-display); font-size: 12.5px; line-height: 1.5;
+    outline: none; resize: vertical; min-height: 70px;
+  }
+  .modal-field textarea:focus { border-color: var(--brand-red); }
   .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
 
   footer {
@@ -760,6 +769,10 @@
           <div class="wallet-chip"><span>wallet cible</span> <b>5JTv…DFXd</b></div>
           <div class="wallet-chip"><span>créée</span> <b>il y a 12 j</b></div>
         </div>
+        <div class="card" style="margin-top:0; margin-bottom:14px;">
+          <div class="card-head"><span class="card-title">Description de la stratégie</span></div>
+          <p class="desc-text" data-desc-for="leg1">Copy-trade en timing sur le wallet cible <b>5JTv…DFXd</b> : achète dès que ce wallet achète un nouveau token (règle A) ou ré-achète rapidement (règle B, rafale &lt; 8s). Ignore l'achat si l'écart depuis le dernier trade dépasse le seuil (règle C) ou si le market cap dépasse le plafond de $50k (règle D). Sort en Take Profit à $490k ou Stop Loss à $7k.</p>
+        </div>
         <div class="detail-kpis">
           <div class="kpi"><span class="kpi-label">PnL total</span><span class="kpi-value" style="font-size:20px;">+1.42 SOL</span><span class="kpi-sub up">+946%</span></div>
           <div class="kpi"><span class="kpi-label">Taux de réussite</span><span class="kpi-value" style="font-size:20px;">62%</span><span class="kpi-sub">8 TP / 5 SL</span></div>
@@ -837,6 +850,10 @@
           <div class="wallet-chip"><span>wallet cible</span> <b>5JTv…DFXd</b></div>
           <div class="wallet-chip"><span>créée</span> <b>il y a 12 j</b></div>
         </div>
+        <div class="card" style="margin-top:0; margin-bottom:14px;">
+          <div class="card-head"><span class="card-title">Description de la stratégie</span></div>
+          <p class="desc-text" data-desc-for="leg2">Deuxième leg de la même logique de timing sur le wallet cible <b>5JTv…DFXd</b>, avec un wallet acheteur distinct : exécute en parallèle du Leg 1 sur les mêmes signaux (règles A/B/C/D) pour répartir le risque sur deux wallets acheteurs. Mêmes seuils TP $490k / SL $7k.</p>
+        </div>
         <div class="detail-kpis">
           <div class="kpi"><span class="kpi-label">PnL total</span><span class="kpi-value" style="font-size:20px;">+1.42 SOL</span><span class="kpi-sub up">+941%</span></div>
           <div class="kpi"><span class="kpi-label">Taux de réussite</span><span class="kpi-value" style="font-size:20px;">62%</span><span class="kpi-sub">8 TP / 5 SL</span></div>
@@ -913,6 +930,10 @@
           <div class="wallet-chip"><span>wallet achat</span> <b>Fx2K…q8Zn</b></div>
           <div class="wallet-chip"><span>wallet cible</span> <b>5JTv…DFXd</b></div>
           <div class="wallet-chip"><span>arrêtée</span> <b>2026-09-06</b></div>
+        </div>
+        <div class="card" style="margin-top:0; margin-bottom:14px;">
+          <div class="card-head"><span class="card-title">Description de la stratégie</span></div>
+          <p class="desc-text" data-desc-for="legacy">Ancienne configuration de copy-trade (arrêtée le 2026-09-06) : mise plus grosse (0.1 SOL) sur les 5 premiers trades suivant la création, puis mise normale (0.05 SOL) ensuite. Mêmes règles TP $490k / SL $7k que les stratégies actuelles.</p>
         </div>
         <div class="detail-kpis">
           <div class="kpi"><span class="kpi-label">PnL total</span><span class="kpi-value" style="font-size:20px;">+8.60 SOL</span><span class="kpi-sub up">historique</span></div>
@@ -1197,6 +1218,10 @@
     <div class="modal-field">
       <label for="editBuyWallet">Wallet acheteur (celui qui buy)</label>
       <input type="text" id="editBuyWallet" required spellcheck="false">
+    </div>
+    <div class="modal-field">
+      <label for="editDescription">Description de la stratégie</label>
+      <textarea id="editDescription" placeholder="Explique la logique de cette stratégie…"></textarea>
     </div>
     <div class="modal-actions">
       <button type="button" class="toolbar-btn" id="editCancelBtn">Annuler</button>
@@ -1546,31 +1571,44 @@
   }
   renderLiveTrades();
 
-  // ---- tasks: edits (name + buy wallet) persisted per strategy in localStorage ----
+  // ---- tasks ⇄ strategy link: name / buy wallet / description edited once,
+  // applied everywhere that strategy shows up (Tâches card, Stratégie tile + detail) ----
   function shortWallet(addr) {
     addr = addr.trim();
     return addr.length > 10 ? addr.slice(0, 4) + '…' + addr.slice(-4) : addr;
   }
+  function setBuyWalletMono(mono, fullAddr) {
+    if (!mono) return;
+    var copyBtn = mono.querySelector('.copy-btn');
+    mono.firstChild.textContent = shortWallet(fullAddr);
+    if (copyBtn) copyBtn.setAttribute('data-copy', fullAddr);
+  }
   var taskOverrides = {};
   try { taskOverrides = JSON.parse(localStorage.getItem('b10k_task_overrides') || '{}'); } catch (e) {}
-  function applyOverride(row, ov) {
+  function applyOverride(key, ov) {
+    var taskRow = document.querySelector('.task-card[data-strategy="' + key + '"]');
+    var stratCard = document.querySelector('.strat-card[data-strategy="' + key + '"]');
+    var stratDetail = document.querySelector('.strat-detail-block[data-strategy="' + key + '"]');
+
     if (ov.name) {
-      var nameEl = row.querySelector('.cfg-name b');
-      if (nameEl) nameEl.textContent = ov.name;
+      if (taskRow) { var t1 = taskRow.querySelector('.cfg-name b'); if (t1) t1.textContent = ov.name; }
+      if (stratCard) { var t2 = stratCard.querySelector('.strat-card-name'); if (t2) t2.textContent = ov.name; }
+      if (stratDetail) { var t3 = stratDetail.querySelector('.strat-detail-title h3'); if (t3) t3.textContent = ov.name; }
     }
     if (ov.buyWallet) {
-      var mono = row.querySelector('.wallet-cell .w-mono');
-      var copyBtn = mono ? mono.querySelector('.copy-btn') : null;
-      if (mono) {
-        mono.firstChild.textContent = shortWallet(ov.buyWallet);
-        if (copyBtn) copyBtn.setAttribute('data-copy', ov.buyWallet);
+      if (taskRow) setBuyWalletMono(taskRow.querySelector('.wallet-cell .w-mono'), ov.buyWallet);
+      if (stratCard) setBuyWalletMono(stratCard.querySelector('.strat-card-wallets .w-mono:not(.muted)'), ov.buyWallet);
+      if (stratDetail) {
+        var chip = stratDetail.querySelector('.detail-wallets .wallet-chip b');
+        if (chip) chip.textContent = shortWallet(ov.buyWallet);
       }
     }
+    if (ov.description && stratDetail) {
+      var descEl = stratDetail.querySelector('[data-desc-for="' + key + '"]');
+      if (descEl) descEl.textContent = ov.description;
+    }
   }
-  document.querySelectorAll('.task-card').forEach(function (row) {
-    var ov = taskOverrides[row.dataset.strategy];
-    if (ov) applyOverride(row, ov);
-  });
+  Object.keys(taskOverrides).forEach(function (key) { applyOverride(key, taskOverrides[key]); });
 
   // ---- tasks: search ----
   var taskSearch = document.getElementById('taskSearch');
@@ -1613,7 +1651,7 @@
       }
       var editBtn = evt.target.closest('[data-edit]');
       if (editBtn) {
-        openEditModal(editBtn.closest('.task-card'));
+        openEditModal(editBtn.closest('.task-card').dataset.strategy);
         return;
       }
       // two explicit, distinct buttons — clicking one sets it active and disarms its sibling
@@ -1631,23 +1669,28 @@
   var taskEditForm = document.getElementById('taskEditForm');
   var editCfgName = document.getElementById('editCfgName');
   var editBuyWallet = document.getElementById('editBuyWallet');
+  var editDescription = document.getElementById('editDescription');
   var editCancelBtn = document.getElementById('editCancelBtn');
-  var editingRow = null;
+  var editingKey = null;
 
-  function openEditModal(row) {
-    if (!taskEditModal || !row) return;
-    editingRow = row;
-    var nameEl = row.querySelector('.cfg-name b');
-    var mono = row.querySelector('.wallet-cell .w-mono');
+  function openEditModal(key) {
+    if (!taskEditModal || !key) return;
+    editingKey = key;
+    var row = document.querySelector('.task-card[data-strategy="' + key + '"]');
+    var stratDetail = document.querySelector('.strat-detail-block[data-strategy="' + key + '"]');
+    var nameEl = row ? row.querySelector('.cfg-name b') : null;
+    var mono = row ? row.querySelector('.wallet-cell .w-mono') : null;
     var copyBtn = mono ? mono.querySelector('.copy-btn') : null;
+    var descEl = stratDetail ? stratDetail.querySelector('[data-desc-for="' + key + '"]') : null;
     editCfgName.value = nameEl ? nameEl.textContent.trim() : '';
     editBuyWallet.value = copyBtn ? (copyBtn.getAttribute('data-copy') || '') : '';
+    editDescription.value = descEl ? descEl.textContent.trim() : '';
     taskEditModal.hidden = false;
     editCfgName.focus();
   }
   function closeEditModal() {
     if (taskEditModal) taskEditModal.hidden = true;
-    editingRow = null;
+    editingKey = null;
   }
   if (editCancelBtn) editCancelBtn.addEventListener('click', closeEditModal);
   if (taskEditModal) {
@@ -1661,13 +1704,14 @@
   if (taskEditForm) {
     taskEditForm.addEventListener('submit', function (evt) {
       evt.preventDefault();
-      if (!editingRow) return;
+      if (!editingKey) return;
       var name = editCfgName.value.trim();
       var wallet = editBuyWallet.value.trim();
+      var description = editDescription.value.trim();
       if (!name || !wallet) return;
-      var ov = { name: name, buyWallet: wallet };
-      applyOverride(editingRow, ov);
-      taskOverrides[editingRow.dataset.strategy] = ov;
+      var ov = { name: name, buyWallet: wallet, description: description };
+      applyOverride(editingKey, ov);
+      taskOverrides[editingKey] = ov;
       try { localStorage.setItem('b10k_task_overrides', JSON.stringify(taskOverrides)); } catch (e) {}
       closeEditModal();
     });
