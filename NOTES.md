@@ -7,7 +7,7 @@ aucun lien avec son dépôt git. Ce dossier ne contient que le site (design).
 
 - `index.html` — la page complète (HTML + CSS + JS, un seul fichier, aucune dépendance
   sauf les polices Google Fonts (Sora, IBM Plex Mono) et l'image de fond).
-- `bg.jpg` — l'image de fond (supercars néon rouge/noir), référencée en relatif par `index.html`.
+- `bg.jpg` — l'image de fond (supercars néon violet/noir), référencée en relatif par `index.html`.
 - `api/import.js` — fonction serverless Vercel : `POST /api/import`, appelée par
   l'outil de backtest d'un ami pour pousser une stratégie sur ce site (voir section
   "Connecter le backtest d'un ami" plus bas). Zéro dépendance (pas de `package.json`),
@@ -45,9 +45,11 @@ design n'est pas figé — pas de branchement sur le vrai bot pour l'instant, vo
 ### Identité / thème
 - Nom du site : **POK Industries** (pensé comme la plateforme qui pourra héberger
   plusieurs bots/stratégies plus tard, pas seulement Bundle10k).
-- Palette noir/rouge néon reprise de l'image de fond (voitures + néons rouges),
-  avec du vert néon réservé uniquement au sens "gain/positif" et de l'ambre pour
-  "en cours/attention" — pour ne pas tout confondre dans le rouge.
+- Palette noir/violet néon reprise de l'image de fond (voitures + néons violets,
+  changée le 2026-09-17), avec du vert néon réservé uniquement au sens
+  "gain/positif" et du rouge uniquement pour "perte/critique" (SL), et de
+  l'ambre pour "en cours/attention" — pour ne pas tout confondre dans la
+  couleur de marque.
 - Cartes en verre dépoli (glassmorphism) par-dessus l'image de fond fixe.
 - Police d'affichage : Sora. Police pour les chiffres/adresses : IBM Plex Mono.
 

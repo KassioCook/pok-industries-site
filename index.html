@@ -4,19 +4,19 @@
 
   :root {
     color-scheme: dark;
-    --bg-plane:      #050203;
-    --bg:            #070304;
-    --surface-1:     rgba(22,10,11,0.70);
-    --surface-2:     rgba(32,14,15,0.80);
-    --surface-3:     rgba(44,18,19,0.88);
-    --border:        rgba(255,95,95,0.14);
-    --border-strong: rgba(255,120,120,0.28);
-    --text-primary:  #f6efec;
-    --text-secondary:#b7a29f;
-    --text-muted:    #7c6a68;
-    --brand-red:     #ff2438;
-    --brand-red-dim: rgba(255,36,56,0.15);
-    --brand-crimson: #5c0d14;
+    --bg-plane:      #05030a;
+    --bg:            #07040f;
+    --surface-1:     rgba(20,12,32,0.70);
+    --surface-2:     rgba(28,16,44,0.80);
+    --surface-3:     rgba(38,20,58,0.88);
+    --border:        rgba(180,120,255,0.14);
+    --border-strong: rgba(190,135,255,0.28);
+    --text-primary:  #f3eefc;
+    --text-secondary:#b6a8c9;
+    --text-muted:    #7c6f8f;
+    --brand-red:     #a855f7;
+    --brand-red-dim: rgba(168,85,247,0.15);
+    --brand-crimson: #3b0764;
     --good:          #26e37f;
     --good-dim:      rgba(38,227,127,0.14);
     --amber:         #ffab2e;
@@ -50,7 +50,7 @@
   .bg-tint {
     position: fixed; inset: 0; z-index: -1; pointer-events: none;
     background-image:
-      radial-gradient(ellipse 90% 50% at 50% -8%, rgba(255,36,56,0.22), transparent 62%),
+      radial-gradient(ellipse 90% 50% at 50% -8%, rgba(168,85,247,0.22), transparent 62%),
       linear-gradient(180deg, rgba(5,2,3,0.5) 0%, rgba(5,2,3,0.68) 55%, rgba(5,2,3,0.90) 100%);
   }
 
@@ -68,7 +68,7 @@
   .brand-mark {
     width: 32px; height: 32px; border-radius: 9px; flex: none;
     background: conic-gradient(from 220deg, var(--brand-crimson), var(--brand-red), var(--amber), var(--brand-crimson));
-    box-shadow: 0 0 14px rgba(255,36,56,0.45);
+    box-shadow: 0 0 14px rgba(168,85,247,0.45);
     display: flex; align-items: center; justify-content: center;
     font-family: var(--font-mono); font-weight: 600; font-size: 12px; color: #0a0303;
   }
@@ -147,7 +147,7 @@
   .demo-banner {
     display: flex; align-items: center; gap: 10px; justify-content: space-between; padding: 9px 14px;
     border-radius: 10px; margin-bottom: 14px; background: var(--brand-red-dim);
-    border: 1px solid rgba(255,36,56,0.32); font-size: 12px; color: var(--text-secondary);
+    border: 1px solid rgba(168,85,247,0.32); font-size: 12px; color: var(--text-secondary);
   }
   .demo-banner strong { color: var(--text-primary); }
   .demo-banner button {
@@ -231,7 +231,7 @@
   }
   .chip:hover { color: var(--text-primary); }
   .chip:focus-visible { outline: 2px solid var(--brand-red); outline-offset: 1px; }
-  .chip.is-active { background: var(--brand-red-dim); border-color: rgba(255,36,56,0.45); color: var(--text-primary); }
+  .chip.is-active { background: var(--brand-red-dim); border-color: rgba(168,85,247,0.45); color: var(--text-primary); }
   .chip .n { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-muted); }
   .chip.is-active .n { color: var(--brand-red); }
 
@@ -289,14 +289,14 @@
   .strat-card-live {
     display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; width: fit-content;
     font-family: var(--font-mono); font-size: 10.5px; font-weight: 600; color: var(--brand-red);
-    background: var(--brand-red-dim); border: 1px solid rgba(255,36,56,0.35);
+    background: var(--brand-red-dim); border: 1px solid rgba(168,85,247,0.35);
   }
   .strat-card-live .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--brand-red); flex: none; animation: pulse 1.3s ease-in-out infinite; }
   .new-badge {
     position: absolute; top: -9px; right: -9px; min-width: 21px; height: 21px; padding: 0 5px; border-radius: 999px;
     background: var(--brand-red); color: #fff; font-family: var(--font-mono); font-size: 10.5px; font-weight: 700;
     display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-plane);
-    box-shadow: 0 0 10px rgba(255,36,56,0.55);
+    box-shadow: 0 0 10px rgba(168,85,247,0.55);
   }
   .strat-card:hover { border-color: var(--border-strong); transform: translateY(-2px); box-shadow: 0 10px 26px rgba(0,0,0,0.35); }
   .strat-card:focus-visible { outline: 2px solid var(--brand-red); outline-offset: 2px; }
@@ -422,7 +422,7 @@
   }
   .toolbar-btn:hover { color: var(--text-primary); }
   .toolbar-btn:focus-visible { outline: 2px solid var(--brand-red); outline-offset: 1px; }
-  .toolbar-btn.primary { background: var(--brand-red-dim); border-color: rgba(255,36,56,0.4); color: var(--text-primary); }
+  .toolbar-btn.primary { background: var(--brand-red-dim); border-color: rgba(168,85,247,0.4); color: var(--text-primary); }
   .toolbar-btn.go { background: var(--good-dim); border-color: rgba(38,227,127,0.35); color: var(--good); }
   .toolbar-btn.stop { background: var(--amber-dim); border-color: rgba(255,171,46,0.35); color: var(--amber); }
 
@@ -569,7 +569,7 @@
     position: fixed; inset: 0; z-index: 80;
     display: flex; align-items: center; justify-content: center; text-align: center;
     padding: 24px; background:
-      radial-gradient(ellipse 80% 55% at 50% 38%, rgba(255,36,56,0.20), transparent 65%),
+      radial-gradient(ellipse 80% 55% at 50% 38%, rgba(168,85,247,0.20), transparent 65%),
       rgba(5,2,3,0.62);
     -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
     transition: opacity 0.7s ease, filter 0.7s ease, transform 0.7s ease;
@@ -581,14 +581,14 @@
   .welcome-mark {
     width: 60px; height: 60px; border-radius: 16px; flex: none;
     background: conic-gradient(from 220deg, var(--brand-crimson), var(--brand-red), var(--amber), var(--brand-crimson));
-    box-shadow: 0 0 26px rgba(255,36,56,0.5);
+    box-shadow: 0 0 26px rgba(168,85,247,0.5);
     display: flex; align-items: center; justify-content: center;
     font-family: var(--font-mono); font-weight: 700; font-size: 18px; color: #0a0303;
   }
   .welcome-title {
     margin: 0; font-family: var(--font-display); font-weight: 800; letter-spacing: 0.3px;
     font-size: clamp(30px, 7vw, 52px); color: var(--text-primary);
-    text-shadow: 0 0 30px rgba(255,36,56,0.35);
+    text-shadow: 0 0 30px rgba(168,85,247,0.35);
   }
   .welcome-sub {
     margin: 0; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.4px;
@@ -691,7 +691,7 @@
               <stop offset="100%" stop-color="#26e37f" stop-opacity="0"/>
             </linearGradient>
             <linearGradient id="lineStroke" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="#ff2438"/>
+              <stop offset="0%" stop-color="#a855f7"/>
               <stop offset="100%" stop-color="#26e37f"/>
             </linearGradient>
           </defs>
@@ -816,7 +816,7 @@
                   <stop offset="0%" stop-color="#26e37f" stop-opacity="0.30"/><stop offset="100%" stop-color="#26e37f" stop-opacity="0"/>
                 </linearGradient>
                 <linearGradient id="lineStroke-leg1" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stop-color="#ff2438"/><stop offset="100%" stop-color="#26e37f"/>
+                  <stop offset="0%" stop-color="#a855f7"/><stop offset="100%" stop-color="#26e37f"/>
                 </linearGradient>
               </defs>
               <g id="gridLines-leg1"></g><g id="yLabels-leg1"></g>
@@ -897,7 +897,7 @@
                   <stop offset="0%" stop-color="#26e37f" stop-opacity="0.30"/><stop offset="100%" stop-color="#26e37f" stop-opacity="0"/>
                 </linearGradient>
                 <linearGradient id="lineStroke-leg2" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stop-color="#ff2438"/><stop offset="100%" stop-color="#26e37f"/>
+                  <stop offset="0%" stop-color="#a855f7"/><stop offset="100%" stop-color="#26e37f"/>
                 </linearGradient>
               </defs>
               <g id="gridLines-leg2"></g><g id="yLabels-leg2"></g>
@@ -978,7 +978,7 @@
                   <stop offset="0%" stop-color="#26e37f" stop-opacity="0.30"/><stop offset="100%" stop-color="#26e37f" stop-opacity="0"/>
                 </linearGradient>
                 <linearGradient id="lineStroke-legacy" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stop-color="#ff2438"/><stop offset="100%" stop-color="#26e37f"/>
+                  <stop offset="0%" stop-color="#a855f7"/><stop offset="100%" stop-color="#26e37f"/>
                 </linearGradient>
               </defs>
               <g id="gridLines-legacy"></g><g id="yLabels-legacy"></g>
@@ -1420,12 +1420,12 @@
       var gl = document.createElementNS('http://www.w3.org/2000/svg', 'line');
       gl.setAttribute('x1', padL); gl.setAttribute('x2', W - padR);
       gl.setAttribute('y1', y); gl.setAttribute('y2', y);
-      gl.setAttribute('stroke', 'rgba(255,120,120,0.10)'); gl.setAttribute('stroke-width', '1');
+      gl.setAttribute('stroke', 'rgba(190,135,255,0.10)'); gl.setAttribute('stroke-width', '1');
       grid.appendChild(gl);
       var lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
       lbl.setAttribute('x', 4); lbl.setAttribute('y', y + 3);
       lbl.setAttribute('font-family', 'IBM Plex Mono, monospace');
-      lbl.setAttribute('font-size', '9.5'); lbl.setAttribute('fill', '#7c6a68');
+      lbl.setAttribute('font-size', '9.5'); lbl.setAttribute('fill', '#7c6f8f');
       lbl.textContent = v.toFixed(1);
       yLabels.appendChild(lbl);
     }
@@ -1437,7 +1437,7 @@
       var last = i === data.length - 1;
       c.setAttribute('r', last ? 5 : 3);
       c.setAttribute('fill', last ? '#26e37f' : '#0a0303');
-      c.setAttribute('stroke', last ? '#0a0303' : '#ff2438');
+      c.setAttribute('stroke', last ? '#0a0303' : '#a855f7');
       c.setAttribute('stroke-width', last ? 2 : 1.6);
       dotsG.appendChild(c);
     });
