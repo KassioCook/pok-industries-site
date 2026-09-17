@@ -34,11 +34,10 @@
 
   body { background: var(--bg-plane); color: var(--text-primary); font-family: var(--font-display); -webkit-font-smoothing: antialiased; }
 
-  html { scrollbar-width: thin; scrollbar-color: var(--border-strong) var(--bg-plane); }
-  ::-webkit-scrollbar { width: 10px; height: 10px; }
-  ::-webkit-scrollbar-track { background: var(--bg-plane); }
-  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 999px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--brand-red); }
+  html { scrollbar-width: none; }
+  ::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+  html.pre-welcome, body.pre-welcome { overflow: hidden !important; height: 100%; }
 
   .bg-layer {
     position: fixed; inset: 0; z-index: -1;
@@ -547,7 +546,6 @@
     0%, 100% { transform: translateY(0); opacity: 0.55; }
     50% { transform: translateY(6px); opacity: 1; }
   }
-  .welcome-spacer { height: 40vh; }
   @media (prefers-reduced-motion: reduce) {
     .welcome-hint { animation: none; }
   }
@@ -563,7 +561,6 @@
     <div class="welcome-hint">Scroll pour continuer ↓</div>
   </div>
 </div>
-<div class="welcome-spacer" aria-hidden="true"></div>
 
 <div class="app">
 
@@ -1149,24 +1146,34 @@
 
 <script>
 (function () {
-  // ---- welcome screen: one small scroll triggers a full dissolve animation ----
+  // ---- welcome screen: scroll is locked until the first input, which plays a
+  // one-shot dissolve animation and reveals the site already sitting underneath
+  // (no distance to travel, so nothing to scroll back into by accident) ----
   var welcomeEl = document.getElementById('welcomeScreen');
   if (welcomeEl) {
+    document.documentElement.classList.add('pre-welcome');
+    document.body.classList.add('pre-welcome');
     var welcomeDissolved = false;
     function dissolveWelcome() {
       if (welcomeDissolved) return;
       welcomeDissolved = true;
       welcomeEl.classList.add('is-dissolved');
+      document.documentElement.classList.remove('pre-welcome');
+      document.body.classList.remove('pre-welcome');
     }
-    window.addEventListener('scroll', function () {
-      if (window.scrollY > 16) dissolveWelcome();
-    }, { passive: true });
     window.addEventListener('wheel', function (evt) {
-      if (evt.deltaY > 0) dissolveWelcome();
-    }, { passive: true });
-    window.addEventListener('touchmove', dissolveWelcome, { passive: true });
+      if (!welcomeDissolved) evt.preventDefault();
+      dissolveWelcome();
+    }, { passive: false });
+    window.addEventListener('touchmove', function (evt) {
+      if (!welcomeDissolved) evt.preventDefault();
+      dissolveWelcome();
+    }, { passive: false });
     window.addEventListener('keydown', function (evt) {
-      if (['ArrowDown', 'PageDown', ' '].indexOf(evt.key) !== -1) dissolveWelcome();
+      if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', ' '].indexOf(evt.key) !== -1) {
+        if (!welcomeDissolved) evt.preventDefault();
+        dissolveWelcome();
+      }
     });
   }
 
