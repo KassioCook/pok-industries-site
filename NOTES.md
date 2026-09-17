@@ -8,10 +8,19 @@ aucun lien avec son dépôt git. Ce dossier ne contient que le site (design).
 - `index.html` — la page complète (HTML + CSS + JS, un seul fichier, aucune dépendance
   sauf les polices Google Fonts (Sora, IBM Plex Mono) et l'image de fond).
 - `bg.jpg` — l'image de fond (supercars néon rouge/noir), référencée en relatif par `index.html`.
-- **Site en ligne (démo visuelle réelle, GitHub Pages)** :
+- `api/import.js` — fonction serverless Vercel : `POST /api/import`, appelée par
+  l'outil de backtest d'un ami pour pousser une stratégie sur ce site (voir section
+  "Connecter le backtest d'un ami" plus bas). Zéro dépendance (pas de `package.json`),
+  utilise `fetch` global de Node.
+- `api/strategies.js` — fonction serverless Vercel : `GET /api/strategies`, lue par
+  l'onglet Importation du site pour afficher les stratégies reçues via `/api/import`.
+- **Site en ligne (démo visuelle réelle, GitHub Pages — statique, sans `/api`)** :
   https://kassiocook.github.io/pok-industries-site/
   Dépôt : https://github.com/KassioCook/pok-industries-site (public, indépendant du dépôt du bot).
   Contient un `.nojekyll` (sinon le build GitHub Pages échoue sur ce repo).
+  ⚠️ GitHub Pages ne sert que du statique : `/api/import` et `/api/strategies` n'y
+  fonctionnent pas. Il faut déployer sur Vercel (voir plus bas) pour que l'import
+  depuis le backtest de l'ami marche réellement.
 - Aperçu Claude Artifact (moins fiable pour tester le scroll — rendu dans un iframe qui
   s'auto-dimensionne, donc certains effets liés au scroll de page n'y fonctionnent pas
   pareil que sur le vrai site) : https://claude.ai/artifact/Cu75S2iMauCqD2hmtAZ5Zs
@@ -95,16 +104,21 @@ stratégie et n'incluait pas la stratégie legacy — jugé inutile dans sa form
   Chaque stratégie a maintenant une **description texte** de sa logique
   (règles A/B/C/D), affichée dans sa page détail et éditable depuis la modale.
 
-- **Importation (onglet)** : catalogue de 3 stratégies fictives "sorties d'un
-  backtest" (nom, winrate, PnL simulé, nb de trades testés, TP/SL/slippage/mise,
-  description) avec un bouton **"Importer →"**. Cliquer dessus crée immédiatement
-  une carte dans **Tâches** (PAPER, INACTIVE, wallets "à définir") et une tuile +
-  fiche détail dans **Stratégie** (mêmes clés `data-strategy`), donc ça branche
-  visuellement Importation ⇄ Tâches ⇄ Stratégie comme le reste. Persisté dans
-  `localStorage` (`b10k_imported_backtests`) donc les imports survivent au
-  rechargement. Une fois importée, la stratégie est éditable/activable comme les
-  stratégies natives (même modale ✎, mêmes boutons PAPER/RÉEL). Aucune connexion
-  réelle à un vrai outil de backtest — catalogue et données 100% mockées.
+- **Importation (onglet)** : liste de stratégies "sorties d'un backtest" (nom,
+  winrate, PnL simulé, nb de trades testés, TP/SL/slippage/mise, description)
+  avec un bouton **"Importer →"**. Cliquer dessus crée immédiatement une carte
+  dans **Tâches** (PAPER, INACTIVE, wallets "à définir") et une tuile + fiche
+  détail dans **Stratégie** (mêmes clés `data-strategy`), donc ça branche
+  visuellement Importation ⇄ Tâches ⇄ Stratégie comme le reste. Cette partie
+  "transformer en Tâche" reste locale au navigateur (`localStorage`,
+  `b10k_imported_backtests`), comme le reste des Tâches aujourd'hui.
+  La **liste elle-même** est maintenant réelle et partagée : le site interroge
+  `GET /api/strategies` au chargement (et toutes les 20s) ; si ça répond, la
+  liste vient de là (donc de ce que le backtest de l'ami a réellement envoyé
+  via `/api/import`) ; si l'API ne répond pas (site ouvert en fichier local,
+  ou GitHub Pages, ou clé KV pas encore configurée sur Vercel), le site retombe
+  silencieusement sur 3 exemples fictifs codés en dur, pour que l'onglet ne
+  soit jamais vide pendant qu'on configure Vercel/KV.
 
 ## Pour brancher sur le vrai bot plus tard
 
@@ -123,9 +137,58 @@ Discuté avec l'utilisateur — pas fait pour l'instant, juste noté pour plus t
 4. Les noms de coins ($PUNCH, $DODGE, etc.) et les adresses de wallets dans le
    mockup sont fictifs — à remplacer par les vraies valeurs issues du bot
    (metadata pump.fun pour le nom, clés publiques réelles pour les wallets).
-5. Pour un vrai import depuis l'outil de backtest d'un ami (discuté avec
-   l'utilisateur le 2026-09-17, pas fait) : il faudrait un format de stratégie
-   commun (JSON : TP/SL/slippage/mise/wallets/règles) que le backtest exporte,
-   que le bot puisse charger pour l'exécuter, et que ce site puisse afficher —
-   dépend du point 1 (API du bot) pour que "Importer" fasse plus que remplir
-   l'UI comme aujourd'hui.
+5. Le bot de l'utilisateur (`Bot Kassio`) n'est **toujours pas branché** — décision
+   du 2026-09-17 : il ne compte pas l'utiliser pour l'instant. En revanche l'import
+   depuis le backtest d'un ami est en place côté site (voir section suivante) :
+   c'est son bot à lui, et son site de backtest, qui viendront se connecter ici.
+
+## Connecter le backtest d'un ami — état réel (2026-09-17)
+
+Objectif de l'utilisateur : pouvoir envoyer ce site à un ami qui (1) connecte son
+propre bot de trading, et (2) relie son site de backtest à celui-ci, pour qu'un
+clic sur une stratégie backtestée l'importe directement ici (onglet Importation
+→ Tâches/Stratégie), sans que l'utilisateur touche à son propre bot.
+
+Ce qui est fait côté code : `api/import.js` (écriture) + `api/strategies.js`
+(lecture), stockage dans **Vercel KV** (Redis via l'API REST Upstash, appelée en
+`fetch` brut — aucune dépendance npm ajoutée). Ce qui reste **à faire à la main**,
+dans le dashboard Vercel (pas quelque chose que Claude peut faire à la place de
+l'utilisateur, ça touche à son compte) :
+
+1. **Créer un projet Vercel** relié à ce dépôt GitHub
+   (`KassioCook/pok-industries-site`) — importer depuis vercel.com/new.
+2. Dans ce projet Vercel → onglet **Storage** → créer une base **KV** et la
+   connecter au projet. Ça injecte automatiquement `KV_REST_API_URL` et
+   `KV_REST_API_TOKEN` dans les variables d'environnement.
+3. Ajouter une variable d'environnement **`IMPORT_API_KEY`** (Settings →
+   Environment Variables) — c'est la clé secrète que seul le backtest de l'ami
+   doit connaître pour pouvoir écrire ici. **Ne jamais mettre sa valeur dans ce
+   fichier ni ailleurs dans le dépôt : il est public.** La générer soi-même,
+   par ex. `openssl rand -hex 24`, et la coller uniquement dans le dashboard
+   Vercel (+ la transmettre à l'ami par un canal privé, pas par ce repo).
+4. Redéployer (un push suffit, ou "Redeploy" dans le dashboard) pour que les
+   variables d'environnement prennent effet.
+5. Donner à l'ami : l'URL de son futur endpoint (`https://<domaine-vercel>/api/import`),
+   la clé ci-dessus, et le format ci-dessous.
+
+**Format attendu par `POST /api/import`** (depuis le backtest de l'ami) :
+```
+POST https://<domaine-vercel>/api/import
+Content-Type: application/json
+x-api-key: <IMPORT_API_KEY>
+
+{
+  "name": "Nom de la stratégie",
+  "winrate": 68,
+  "pnl": "+1,240%",
+  "trades": 312,
+  "tp": "$180k",
+  "sl": "$9k",
+  "slip": "80% / 25%",
+  "stake": "0.05",
+  "desc": "Explication de la logique de la stratégie."
+}
+```
+Réponse `201` avec la stratégie créée (avec sa `key` générée), `400` si un champ
+manque, `401` si la clé est absente/fausse. `GET /api/strategies` (pas de clé,
+lecture seule) renvoie `{ "strategies": [...] }` — c'est ce que lit le site.

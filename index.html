@@ -1044,7 +1044,7 @@
         <span class="card-title">Stratégies backtestées</span>
         <span class="card-hint">importer crée directement la Tâche et la fiche Stratégie</span>
       </div>
-      <p class="desc-text" style="margin-top:6px;">Aperçu visuel de ce à quoi ressemblerait l'import — l'outil de backtest n'est pas encore réellement branché (voir <b>NOTES.md</b>).</p>
+      <p class="desc-text" style="margin-top:6px;">Liste alimentée par <code>/api/strategies</code> — dès que le backtest externe appelle <code>/api/import</code>, la stratégie apparaît ici automatiquement (voir <b>NOTES.md</b> pour le format attendu). Tant que ce n'est pas branché, les 3 stratégies ci-dessous sont des exemples de démo.</p>
       <div class="import-list" id="importList" style="margin-top:4px;"></div>
     </div>
   </section>
@@ -1770,7 +1770,9 @@
     taskBody.querySelectorAll('.task-card').forEach(function (row) { setRowStatus(row, false); });
   });
 
-  // ---- import: mock catalog of strategies coming from the backtest tool.
+  // ---- import: strategies coming from the backtest tool, fetched from /api/strategies
+  // (see api/import.js + api/strategies.js) — falls back to this demo catalog when that
+  // API isn't reachable (e.g. opened as a plain file, or on GitHub Pages with no /api).
   // "Importer" creates a real Tâches card + Stratégie tile/detail for it, wired
   // through the exact same applyOverride/openStrategy/openEditModal machinery
   // used by the built-in strategies, so it behaves identically once imported. ----
@@ -1947,13 +1949,34 @@
       );
     }).join('');
   }
+  // replay any strategies imported in a previous visit so Tâches/Stratégie stay populated
+  function replayImportedStrategies() {
+    backtestCatalog.forEach(function (bt) {
+      if (importedBacktests.indexOf(bt.key) !== -1) importBacktest(bt);
+    });
+  }
   renderImportList();
   refreshImportTabBadge();
+  replayImportedStrategies();
 
-  // replay any strategies imported in a previous visit so Tâches/Stratégie stay populated
-  backtestCatalog.forEach(function (bt) {
-    if (importedBacktests.indexOf(bt.key) !== -1) importBacktest(bt);
-  });
+  // ---- pull the real, shared catalog from /api/strategies (backed by the backtest
+  // tool's POSTs to /api/import) — silently keeps the demo catalog above if that API
+  // isn't reachable yet (plain file, GitHub Pages, or KV not configured on Vercel) ----
+  function refreshCatalogFromApi() {
+    fetch('/api/strategies', { cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error('api not available'); return r.json(); })
+      .then(function (data) {
+        if (data && Array.isArray(data.strategies)) {
+          backtestCatalog = data.strategies;
+          renderImportList();
+          refreshImportTabBadge();
+          replayImportedStrategies();
+        }
+      })
+      .catch(function () {});
+  }
+  refreshCatalogFromApi();
+  setInterval(refreshCatalogFromApi, 20000);
 
   var importList = document.getElementById('importList');
   if (importList) {
