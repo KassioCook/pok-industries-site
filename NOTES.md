@@ -35,12 +35,13 @@ design n'est pas figé — pas de branchement sur le vrai bot pour l'instant, vo
 - Cartes en verre dépoli (glassmorphism) par-dessus l'image de fond fixe.
 - Police d'affichage : Sora. Police pour les chiffres/adresses : IBM Plex Mono.
 
-### Structure : 4 onglets
+### Structure : 5 onglets
 1. **Vue d'ensemble** — 3 KPI (PnL session, taux de réussite, positions actives)
    + courbe de PnL cumulé (graphique SVG avec survol/tooltip).
 2. **Stratégie** — la pièce centrale, voir détail plus bas.
-3. **Tâches** — liste des configs de copy-trade (une carte par wallet/stratégie).
-4. **Activité** — journal compact des décisions du bot (BUY/SKIP/TP/SL).
+3. **Importation** — catalogue de stratégies "backtestées" (mock), voir détail plus bas.
+4. **Tâches** — liste des configs de copy-trade (une carte par wallet/stratégie).
+5. **Activité** — journal compact des décisions du bot (BUY/SKIP/TP/SL).
 
 (L'onglet "Positions" a été supprimé : il faisait doublon avec le détail par
 stratégie et n'incluait pas la stratégie legacy — jugé inutile dans sa forme.)
@@ -94,6 +95,17 @@ stratégie et n'incluait pas la stratégie legacy — jugé inutile dans sa form
   Chaque stratégie a maintenant une **description texte** de sa logique
   (règles A/B/C/D), affichée dans sa page détail et éditable depuis la modale.
 
+- **Importation (onglet)** : catalogue de 3 stratégies fictives "sorties d'un
+  backtest" (nom, winrate, PnL simulé, nb de trades testés, TP/SL/slippage/mise,
+  description) avec un bouton **"Importer →"**. Cliquer dessus crée immédiatement
+  une carte dans **Tâches** (PAPER, INACTIVE, wallets "à définir") et une tuile +
+  fiche détail dans **Stratégie** (mêmes clés `data-strategy`), donc ça branche
+  visuellement Importation ⇄ Tâches ⇄ Stratégie comme le reste. Persisté dans
+  `localStorage` (`b10k_imported_backtests`) donc les imports survivent au
+  rechargement. Une fois importée, la stratégie est éditable/activable comme les
+  stratégies natives (même modale ✎, mêmes boutons PAPER/RÉEL). Aucune connexion
+  réelle à un vrai outil de backtest — catalogue et données 100% mockées.
+
 ## Pour brancher sur le vrai bot plus tard
 
 Discuté avec l'utilisateur — pas fait pour l'instant, juste noté pour plus tard :
@@ -111,3 +123,9 @@ Discuté avec l'utilisateur — pas fait pour l'instant, juste noté pour plus t
 4. Les noms de coins ($PUNCH, $DODGE, etc.) et les adresses de wallets dans le
    mockup sont fictifs — à remplacer par les vraies valeurs issues du bot
    (metadata pump.fun pour le nom, clés publiques réelles pour les wallets).
+5. Pour un vrai import depuis l'outil de backtest d'un ami (discuté avec
+   l'utilisateur le 2026-09-17, pas fait) : il faudrait un format de stratégie
+   commun (JSON : TP/SL/slippage/mise/wallets/règles) que le backtest exporte,
+   que le bot puisse charger pour l'exécuter, et que ce site puisse afficher —
+   dépend du point 1 (API du bot) pour que "Importer" fasse plus que remplir
+   l'UI comme aujourd'hui.

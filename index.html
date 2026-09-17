@@ -40,14 +40,32 @@
   html.pre-welcome, body.pre-welcome { overflow: hidden !important; height: 100%; }
 
   .bg-layer {
-    position: fixed; inset: 0; z-index: -1;
+    position: fixed; inset: 0; z-index: -1; overflow: hidden;
+    background: var(--bg-plane);
+    display: flex; align-items: center; justify-content: center;
+  }
+  /* wraps the <img> so it shrinks to fit and is never upscaled/blurred or cropped —
+     its box exactly matches the rendered image, which is what lets .bg-spot
+     percentages line up with the cars regardless of viewport size */
+  .bg-photo-frame { position: relative; max-width: 100%; max-height: 100%; line-height: 0; }
+  .bg-photo { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; }
+  .bg-spot {
+    position: absolute; transform: translate(-50%, -50%); border-radius: 50%;
+    pointer-events: none; mix-blend-mode: screen; filter: blur(3px);
+  }
+  .bg-spot-lambo {
+    left: 27%; top: 60%; width: 30%; height: 58%;
+    background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(255,205,150,0.55), rgba(255,90,60,0.24) 45%, transparent 72%);
+  }
+  .bg-spot-mclaren {
+    left: 74%; top: 62%; width: 26%; height: 46%;
+    background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(255,205,150,0.5), rgba(255,90,60,0.22) 45%, transparent 72%);
+  }
+  .bg-tint {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
     background-image:
       radial-gradient(ellipse 90% 50% at 50% -8%, rgba(255,36,56,0.22), transparent 62%),
-      linear-gradient(180deg, rgba(5,2,3,0.74) 0%, rgba(5,2,3,0.88) 55%, rgba(5,2,3,0.97) 100%),
-      url("bg.jpg");
-    background-size: cover, cover, cover;
-    background-position: center, center, center 32%;
-    background-repeat: no-repeat;
+      linear-gradient(180deg, rgba(5,2,3,0.5) 0%, rgba(5,2,3,0.68) 55%, rgba(5,2,3,0.90) 100%);
   }
 
   .app { max-width: 1080px; margin: 0 auto; padding: 16px 16px 56px; }
@@ -499,6 +517,23 @@
   .icon-btn.toggle-off { color: var(--amber); border-color: rgba(255,171,46,0.4); }
   .icon-btn.danger:hover { color: var(--critical); border-color: rgba(255,59,70,0.5); }
 
+  /* ---------- import (backtest → Tâches/Stratégie) ---------- */
+  .import-list { display: flex; flex-direction: column; gap: 12px; }
+  .import-card {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .import-card.is-imported { opacity: 0.68; }
+  .import-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .import-card-name { display: flex; flex-direction: column; gap: 2px; }
+  .import-card-name b { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+  .import-card-name small { font-size: 10.5px; color: var(--text-muted); font-family: var(--font-mono); }
+  .import-stats { display: flex; gap: 18px; flex-wrap: wrap; font-size: 12px; color: var(--text-secondary); }
+  .import-stats b { color: var(--text-primary); font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .import-actions { display: flex; align-items: center; gap: 10px; flex: none; }
+  .import-link { background: none; border: none; padding: 0; color: var(--brand-red); font-family: var(--font-display); font-size: 12px; font-weight: 600; cursor: pointer; }
+  .import-link:hover { text-decoration: underline; }
+
   /* ---------- edit config modal ---------- */
   .modal-overlay {
     position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center;
@@ -586,7 +621,14 @@
   }
 </style>
 
-<div class="bg-layer"></div>
+<div class="bg-layer">
+  <div class="bg-photo-frame">
+    <img class="bg-photo" src="bg.jpg" alt="" aria-hidden="true">
+    <span class="bg-spot bg-spot-lambo" aria-hidden="true"></span>
+    <span class="bg-spot bg-spot-mclaren" aria-hidden="true"></span>
+  </div>
+</div>
+<div class="bg-tint" aria-hidden="true"></div>
 
 <div class="welcome-screen" id="welcomeScreen">
   <div class="welcome-inner">
@@ -627,8 +669,9 @@
   <div class="tabnav" role="tablist">
     <button class="tab is-active" role="tab" data-panel="overview" type="button">Vue d'ensemble</button>
     <button class="tab" role="tab" data-panel="strategy" type="button">Stratégie<span class="new-badge" id="stratTabBadge">+2</span></button>
+    <button class="tab" role="tab" data-panel="import" type="button">Importation<span class="new-badge" id="importTabBadge">+3</span></button>
     <button class="tab" role="tab" data-panel="activity" type="button">Activité <span class="tab-count">6</span></button>
-    <button class="tab" role="tab" data-panel="tasks" type="button">Tâches <span class="tab-count">3</span></button>
+    <button class="tab" role="tab" data-panel="tasks" type="button">Tâches <span class="tab-count" id="tasksTabCount">3</span></button>
   </div>
 
   <!-- ============ OVERVIEW ============ -->
@@ -1007,6 +1050,18 @@
         </div>
       </div>
 
+    </div>
+  </section>
+
+  <!-- ============ IMPORT (backtest → Tâches/Stratégie) ============ -->
+  <section class="panel" data-panel="import">
+    <div class="card" style="margin-top:0;">
+      <div class="card-head">
+        <span class="card-title">Stratégies backtestées</span>
+        <span class="card-hint">importer crée directement la Tâche et la fiche Stratégie</span>
+      </div>
+      <p class="desc-text" style="margin-top:6px;">Aperçu visuel de ce à quoi ressemblerait l'import — l'outil de backtest n'est pas encore réellement branché (voir <b>NOTES.md</b>).</p>
+      <div class="import-list" id="importList" style="margin-top:4px;"></div>
     </div>
   </section>
 
@@ -1491,7 +1546,6 @@
   var stratGrid = document.getElementById('stratGrid');
   var stratDetail = document.getElementById('stratDetail');
   var stratCloseBtn = document.getElementById('stratCloseBtn');
-  var stratBlocks = document.querySelectorAll('.strat-detail-block');
 
   // "new trades since last visit" notification badges — cleared once a strategy is opened
   var newTradeCounts = { leg1: 1, leg2: 1, legacy: 0 };
@@ -1506,7 +1560,7 @@
     if (!stratGrid || !stratDetail) return;
     stratGrid.hidden = true;
     stratDetail.hidden = false;
-    stratBlocks.forEach(function (b) { b.hidden = b.dataset.strategy !== name; });
+    document.querySelectorAll('.strat-detail-block').forEach(function (b) { b.hidden = b.dataset.strategy !== name; });
     if (newTradeCounts[name]) {
       newTradeCounts[name] = 0;
       var tileBadge = document.querySelector('.new-badge[data-newbadge="' + name + '"]');
@@ -1731,6 +1785,205 @@
   if (stopAllBtn) stopAllBtn.addEventListener('click', function () {
     taskBody.querySelectorAll('.task-card').forEach(function (row) { setRowStatus(row, false); });
   });
+
+  // ---- import: mock catalog of strategies coming from the backtest tool.
+  // "Importer" creates a real Tâches card + Stratégie tile/detail for it, wired
+  // through the exact same applyOverride/openStrategy/openEditModal machinery
+  // used by the built-in strategies, so it behaves identically once imported. ----
+  var backtestCatalog = [
+    {
+      key: 'bt_scalp_v2', name: 'Scalp rapide V2', winrate: 68, pnl: '+1,240%', trades: 312,
+      tp: '$180k', sl: '$9k', slip: '80% / 25%', stake: '0.05',
+      desc: 'Backtest sur un scalp rapide : achète dès la détection d’un nouveau wallet suivi (règle A) avec une sortie TP resserrée à $180k pour capter le début du move et limiter l’exposition. SL large à $9k pour laisser respirer les tokens qui redescendent avant de repartir.'
+    },
+    {
+      key: 'bt_snipe_gros', name: 'Snipe gros wallets', winrate: 54, pnl: '+610%', trades: 189,
+      tp: '$650k', sl: '$5k', slip: '95% / 20%', stake: '0.03',
+      desc: 'Backtest ciblant uniquement les wallets à forte mise initiale : slippage d’achat très agressif (95%) pour ne jamais rater l’entrée, TP tardif à $650k pour laisser courir les gros runs, SL serré à $5k pour couper vite les échecs.'
+    },
+    {
+      key: 'bt_antirug', name: 'Anti-rug filtré', winrate: 71, pnl: '+2,050%', trades: 96,
+      tp: '$300k', sl: '$12k', slip: '70% / 30%', stake: '0.08',
+      desc: 'Backtest le plus sélectif des trois : filtre supplémentaire sur la liquidité avant d’acheter (évite les tokens facilement "rug"), moins de trades mais meilleur taux de réussite. TP $300k / SL $12k, mise plus grosse (0.08 SOL) vu le taux de réussite plus élevé.'
+    }
+  ];
+
+  var importedBacktests = [];
+  try { importedBacktests = JSON.parse(localStorage.getItem('b10k_imported_backtests') || '[]'); } catch (e) {}
+
+  function bumpTaskCount() {
+    var taskBodyEl = document.getElementById('taskBody');
+    var count = taskBodyEl ? taskBodyEl.querySelectorAll('.task-card').length : 0;
+    var tabCountEl = document.getElementById('tasksTabCount');
+    if (tabCountEl) tabCountEl.textContent = String(count);
+    var hintEl = document.querySelector('.panel[data-panel="tasks"] .card-hint');
+    if (hintEl) hintEl.textContent = hintEl.textContent.replace(/\d+\s+configs?/, count + ' configs');
+  }
+
+  function refreshImportTabBadge() {
+    var remaining = backtestCatalog.filter(function (b) { return importedBacktests.indexOf(b.key) === -1; }).length;
+    var badge = document.getElementById('importTabBadge');
+    if (badge) { badge.hidden = remaining <= 0; badge.textContent = '+' + remaining; }
+  }
+
+  function importBacktest(bt) {
+    if (importedBacktests.indexOf(bt.key) === -1) {
+      importedBacktests.push(bt.key);
+      try { localStorage.setItem('b10k_imported_backtests', JSON.stringify(importedBacktests)); } catch (e) {}
+    }
+
+    if (!document.querySelector('.task-card[data-strategy="' + bt.key + '"]')) {
+      var taskHtml =
+        '<div class="task-card is-off" data-status="off" data-strategy="' + bt.key + '">' +
+          '<div class="task-card-head">' +
+            '<div class="cfg-name"><b>' + bt.name + '</b><small>importée du backtest · pas encore lancée</small></div>' +
+            '<div class="task-card-controls">' +
+              '<div class="mode-switch" role="group" aria-label="Mode de trading">' +
+                '<button class="mode-btn paper is-active" data-mode="paper" type="button">PAPER</button>' +
+                '<button class="mode-btn live" data-mode="live" type="button">RÉEL</button>' +
+              '</div>' +
+              '<span class="status-pill off">○ INACTIVE</span>' +
+              '<div class="row-actions">' +
+                '<button class="icon-btn toggle-off" data-toggle title="Démarrer">▶</button>' +
+                '<button class="icon-btn" data-edit title="Modifier">✎</button>' +
+                '<button class="icon-btn" title="Dupliquer">⧉</button>' +
+                '<button class="icon-btn danger" title="Supprimer">🗑</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="task-card-wallets">' +
+            '<div class="wallet-cell"><div class="avatar a4"></div><div class="wallet-text">' +
+              '<span class="wallet-role">Wallet acheteur</span><span class="w-mono">à définir</span>' +
+            '</div></div>' +
+            '<span class="arrow">→</span>' +
+            '<div class="wallet-cell"><div class="avatar a4"></div><div class="wallet-text">' +
+              '<span class="wallet-role">Wallet cible (suivi)</span><span class="w-mono">à définir</span>' +
+            '</div></div>' +
+          '</div>' +
+          '<div class="params-inline">' +
+            '<span class="param-chip"><span class="k">Mise</span><span class="v">' + bt.stake + ' SOL</span></span>' +
+            '<span class="param-chip"><span class="k">TP</span><span class="v">' + bt.tp + '</span></span>' +
+            '<span class="param-chip"><span class="k">SL</span><span class="v">' + bt.sl + '</span></span>' +
+            '<span class="param-chip"><span class="k">Slippage</span><span class="v">' + bt.slip + '</span></span>' +
+            '<span class="param-chip"><span class="k">Source</span><span class="v">Backtest</span></span>' +
+          '</div>' +
+        '</div>';
+      var taskBodyEl = document.getElementById('taskBody');
+      if (taskBodyEl) taskBodyEl.insertAdjacentHTML('beforeend', taskHtml);
+    }
+
+    if (!document.querySelector('.strat-card[data-strategy="' + bt.key + '"]')) {
+      var cardHtml =
+        '<button class="strat-card" type="button" data-strategy="' + bt.key + '">' +
+          '<div class="strat-card-top">' +
+            '<span class="status-dot-lg off"></span>' +
+            '<span class="strat-card-name">' + bt.name + '</span>' +
+            '<span class="status-pill off" style="margin-left:auto;">INACTIVE</span>' +
+          '</div>' +
+          '<div class="strat-card-wallets"><span class="w-mono muted">wallets à définir</span></div>' +
+          '<div class="strat-card-pnl">' +
+            '<span class="pnl-big pos">' + bt.pnl + '</span>' +
+            '<span class="pnl-sub">backtest · ' + bt.trades + ' trades testés</span>' +
+          '</div>' +
+          '<span class="strat-card-hint">Importée du backtest — cliquer pour le détail →</span>' +
+        '</button>';
+      if (stratGrid) {
+        stratGrid.insertAdjacentHTML('beforeend', cardHtml);
+        var newCard = stratGrid.querySelector('.strat-card[data-strategy="' + bt.key + '"]');
+        if (newCard) newCard.addEventListener('click', function () { openStrategy(bt.key); });
+      }
+    }
+
+    if (!document.querySelector('.strat-detail-block[data-strategy="' + bt.key + '"]')) {
+      var detailHtml =
+        '<div class="strat-detail-block" data-strategy="' + bt.key + '" hidden>' +
+          '<div class="strat-detail-title" style="margin-bottom:14px;">' +
+            '<span class="status-dot-lg off"></span><h3>' + bt.name + '</h3><span class="status-pill off">INACTIVE</span>' +
+          '</div>' +
+          '<div class="detail-wallets">' +
+            '<div class="wallet-chip"><span>wallet achat</span> <b>à définir</b></div>' +
+            '<div class="wallet-chip"><span>wallet cible</span> <b>à définir</b></div>' +
+            '<div class="wallet-chip"><span>importée</span> <b>à l’instant</b></div>' +
+          '</div>' +
+          '<div class="card" style="margin-top:0; margin-bottom:14px;">' +
+            '<div class="card-head"><span class="card-title">Description de la stratégie</span></div>' +
+            '<p class="desc-text" data-desc-for="' + bt.key + '">' + bt.desc + '</p>' +
+          '</div>' +
+          '<div class="detail-kpis">' +
+            '<div class="kpi"><span class="kpi-label">PnL backtest</span><span class="kpi-value" style="font-size:20px;">' + bt.pnl + '</span><span class="kpi-sub">simulé</span></div>' +
+            '<div class="kpi"><span class="kpi-label">Taux de réussite</span><span class="kpi-value" style="font-size:20px;">' + bt.winrate + '%</span><span class="kpi-sub">backtest</span></div>' +
+            '<div class="kpi"><span class="kpi-label">Trades testés</span><span class="kpi-value" style="font-size:20px;">' + bt.trades + '</span><span class="kpi-sub">historique</span></div>' +
+            '<div class="kpi"><span class="kpi-label">Mise / wallet</span><span class="kpi-value" style="font-size:20px;">' + bt.stake + '</span><span class="kpi-sub">SOL par achat</span></div>' +
+          '</div>' +
+          '<div class="params-inline" style="margin-bottom:14px;">' +
+            '<span class="param-chip"><span class="k">TP</span><span class="v">' + bt.tp + '</span></span>' +
+            '<span class="param-chip"><span class="k">SL</span><span class="v">' + bt.sl + '</span></span>' +
+            '<span class="param-chip"><span class="k">Slippage</span><span class="v">' + bt.slip + '</span></span>' +
+          '</div>' +
+          '<div class="card">' +
+            '<div class="card-head"><span class="card-title">Tokens tradés</span><span class="card-hint">aucun trade réel pour l’instant</span></div>' +
+            '<p class="desc-text" style="margin-top:10px;">Stratégie tout juste importée du backtest — pas encore lancée en PAPER ou en RÉEL, donc pas encore de tokens tradés ici. Passe-la en actif depuis l’onglet Tâches pour commencer.</p>' +
+          '</div>' +
+        '</div>';
+      if (stratDetail) stratDetail.insertAdjacentHTML('beforeend', detailHtml);
+    }
+
+    bumpTaskCount();
+    refreshImportTabBadge();
+  }
+
+  function renderImportList() {
+    var list = document.getElementById('importList');
+    if (!list) return;
+    list.innerHTML = backtestCatalog.map(function (bt) {
+      var isImported = importedBacktests.indexOf(bt.key) !== -1;
+      return (
+        '<div class="import-card' + (isImported ? ' is-imported' : '') + '" data-backtest="' + bt.key + '">' +
+          '<div class="import-card-head">' +
+            '<div class="import-card-name"><b>' + bt.name + '</b><small>backtest externe · ' + bt.trades + ' trades simulés</small></div>' +
+            '<div class="import-actions">' +
+              (isImported
+                ? '<span class="status-pill off">✓ Importée</span><button class="import-link" type="button" data-goto="' + bt.key + '">Voir dans Tâches →</button>'
+                : '<button class="toolbar-btn primary" type="button" data-import="' + bt.key + '">Importer →</button>') +
+            '</div>' +
+          '</div>' +
+          '<div class="import-stats">' +
+            '<span>PnL simulé <b>' + bt.pnl + '</b></span>' +
+            '<span>Taux de réussite <b>' + bt.winrate + '%</b></span>' +
+            '<span>Trades testés <b>' + bt.trades + '</b></span>' +
+          '</div>' +
+          '<p class="desc-text">' + bt.desc + '</p>' +
+          '<div class="params-inline">' +
+            '<span class="param-chip"><span class="k">Mise</span><span class="v">' + bt.stake + ' SOL</span></span>' +
+            '<span class="param-chip"><span class="k">TP</span><span class="v">' + bt.tp + '</span></span>' +
+            '<span class="param-chip"><span class="k">SL</span><span class="v">' + bt.sl + '</span></span>' +
+            '<span class="param-chip"><span class="k">Slippage</span><span class="v">' + bt.slip + '</span></span>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+  }
+  renderImportList();
+  refreshImportTabBadge();
+
+  // replay any strategies imported in a previous visit so Tâches/Stratégie stay populated
+  backtestCatalog.forEach(function (bt) {
+    if (importedBacktests.indexOf(bt.key) !== -1) importBacktest(bt);
+  });
+
+  var importList = document.getElementById('importList');
+  if (importList) {
+    importList.addEventListener('click', function (evt) {
+      var importBtn = evt.target.closest('[data-import]');
+      if (importBtn) {
+        var bt = backtestCatalog.filter(function (b) { return b.key === importBtn.getAttribute('data-import'); })[0];
+        if (bt) { importBacktest(bt); renderImportList(); }
+        return;
+      }
+      var gotoBtn = evt.target.closest('[data-goto]');
+      if (gotoBtn) { activateTab('tasks'); }
+    });
+  }
 
   // ---- copy wallet address ----
   document.addEventListener('click', function (evt) {
