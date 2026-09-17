@@ -213,13 +213,35 @@
     flex-wrap: wrap; font-size: 12.5px; color: var(--text-secondary);
   }
   .chart-stats b { color: var(--text-primary); font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .chart-legend { display: flex; align-items: center; gap: 16px; margin-top: 10px; flex-wrap: wrap; font-size: 11.5px; color: var(--text-muted); }
+  .chart-legend .lg-item { display: flex; align-items: center; gap: 6px; }
+  .chart-legend .lg-dot { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+  .chart-legend .lg-item.tp .lg-dot { background: var(--good); clip-path: polygon(50% 0%, 0% 100%, 100% 100%); border-radius: 0; }
+  .chart-legend .lg-item.sl .lg-dot { background: var(--critical); clip-path: polygon(0% 0%, 100% 0%, 50% 100%); border-radius: 0; }
+  .chart-legend .lg-hint { margin-left: auto; font-style: italic; }
+  .chart-x-label { font-family: var(--font-mono); fill: #7c6f8f; }
   .tooltip {
     position: absolute; pointer-events: none; opacity: 0; transition: opacity 0.1s ease;
     background: var(--surface-3); border: 1px solid var(--border-strong); border-radius: 8px;
-    padding: 7px 10px; font-family: var(--font-mono); font-size: 11.5px; color: var(--text-primary);
-    white-space: nowrap; transform: translate(-50%, -110%); z-index: 5; box-shadow: 0 8px 20px rgba(0,0,0,0.55);
+    padding: 8px 11px; font-family: var(--font-mono); font-size: 11.5px; color: var(--text-primary);
+    white-space: nowrap; transform: translate(-50%, -112%); z-index: 5; box-shadow: 0 8px 20px rgba(0,0,0,0.55);
+    min-width: 128px;
   }
-  .tooltip .t-time { color: var(--text-muted); display: block; font-size: 10.5px; margin-top: 2px; }
+  .tooltip .t-time { color: var(--text-muted); display: block; font-size: 10.5px; margin-top: 4px; }
+  .tooltip .tt-head { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
+  .tooltip.no-trade .tt-head, .tooltip.no-trade .tt-pct { display: none; }
+  .tooltip .tt-badge {
+    font-family: var(--font-display); font-size: 10px; font-weight: 800; letter-spacing: 0.03em;
+    padding: 1.5px 6px; border-radius: 5px; line-height: 1.5;
+  }
+  .tooltip .tt-badge.tp { background: var(--good-dim); color: var(--good); }
+  .tooltip .tt-badge.sl { background: var(--critical-dim); color: var(--critical); }
+  .tooltip .tt-coin { font-size: 11.5px; color: var(--text-primary); font-weight: 600; }
+  .tooltip .tt-body { display: flex; align-items: baseline; gap: 9px; }
+  .tooltip .tt-pct { font-size: 11px; font-weight: 700; }
+  .tooltip .tt-pct.tp { color: var(--good); }
+  .tooltip .tt-pct.sl { color: var(--critical); }
+  .tooltip .tt-note { color: var(--text-muted); font-size: 10.5px; display: block; }
 
   /* ---------- filter chips ---------- */
   .chip-row { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
@@ -697,6 +719,7 @@
           </defs>
           <g id="gridLines"></g>
           <g id="yLabels"></g>
+          <g id="xLabels"></g>
           <path id="areaPath" fill="url(#areaFill)" stroke="none"></path>
           <path id="linePath" fill="none" stroke="url(#lineStroke)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></path>
           <g id="dots"></g>
@@ -704,10 +727,17 @@
           <circle id="hoverDot" r="4.5" fill="#0a0303" stroke="#26e37f" stroke-width="2" style="opacity:0;"></circle>
           <rect id="hitArea" x="0" y="0" width="760" height="220" fill="transparent"></rect>
         </svg>
-        <div class="tooltip" id="chartTooltip">
-          <span id="ttValue">0 SOL</span>
+        <div class="tooltip no-trade" id="chartTooltip">
+          <div class="tt-head"><span class="tt-badge" id="ttBadge">TP</span><span class="tt-coin" id="ttCoin">—</span></div>
+          <div class="tt-body"><span id="ttValue">0 SOL</span><span class="tt-pct" id="ttPct"></span></div>
+          <span class="tt-note" id="ttNote"></span>
           <span class="t-time" id="ttTime">—</span>
         </div>
+      </div>
+      <div class="chart-legend">
+        <span class="lg-item tp"><span class="lg-dot"></span>Take Profit</span>
+        <span class="lg-item sl"><span class="lg-dot"></span>Stop Loss</span>
+        <span class="lg-hint">Survolez un point pour voir le coin, le TP/SL et l'heure exacte</span>
       </div>
       <div class="chart-stats">
         <span>Départ <b>0.00 SOL</b></span>
@@ -819,7 +849,7 @@
                   <stop offset="0%" stop-color="#a855f7"/><stop offset="100%" stop-color="#26e37f"/>
                 </linearGradient>
               </defs>
-              <g id="gridLines-leg1"></g><g id="yLabels-leg1"></g>
+              <g id="gridLines-leg1"></g><g id="yLabels-leg1"></g><g id="xLabels-leg1"></g>
               <path id="areaPath-leg1" fill="url(#areaFill-leg1)" stroke="none"></path>
               <path id="linePath-leg1" fill="none" stroke="url(#lineStroke-leg1)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></path>
               <g id="dots-leg1"></g>
@@ -827,7 +857,12 @@
               <circle id="hoverDot-leg1" r="4.5" fill="#0a0303" stroke="#26e37f" stroke-width="2" style="opacity:0;"></circle>
               <rect id="hitArea-leg1" x="0" y="0" width="760" height="180" fill="transparent"></rect>
             </svg>
-            <div class="tooltip" id="chartTooltip-leg1"><span id="ttValue-leg1">0 SOL</span><span class="t-time" id="ttTime-leg1">—</span></div>
+            <div class="tooltip no-trade" id="chartTooltip-leg1">
+              <div class="tt-head"><span class="tt-badge" id="ttBadge-leg1">TP</span><span class="tt-coin" id="ttCoin-leg1">—</span></div>
+              <div class="tt-body"><span id="ttValue-leg1">0 SOL</span><span class="tt-pct" id="ttPct-leg1"></span></div>
+              <span class="tt-note" id="ttNote-leg1"></span>
+              <span class="t-time" id="ttTime-leg1">—</span>
+            </div>
           </div>
           <div class="params-inline">
             <span class="param-chip"><span class="k">TP</span><span class="v">$490k</span></span>
@@ -900,7 +935,7 @@
                   <stop offset="0%" stop-color="#a855f7"/><stop offset="100%" stop-color="#26e37f"/>
                 </linearGradient>
               </defs>
-              <g id="gridLines-leg2"></g><g id="yLabels-leg2"></g>
+              <g id="gridLines-leg2"></g><g id="yLabels-leg2"></g><g id="xLabels-leg2"></g>
               <path id="areaPath-leg2" fill="url(#areaFill-leg2)" stroke="none"></path>
               <path id="linePath-leg2" fill="none" stroke="url(#lineStroke-leg2)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></path>
               <g id="dots-leg2"></g>
@@ -908,7 +943,12 @@
               <circle id="hoverDot-leg2" r="4.5" fill="#0a0303" stroke="#26e37f" stroke-width="2" style="opacity:0;"></circle>
               <rect id="hitArea-leg2" x="0" y="0" width="760" height="180" fill="transparent"></rect>
             </svg>
-            <div class="tooltip" id="chartTooltip-leg2"><span id="ttValue-leg2">0 SOL</span><span class="t-time" id="ttTime-leg2">—</span></div>
+            <div class="tooltip no-trade" id="chartTooltip-leg2">
+              <div class="tt-head"><span class="tt-badge" id="ttBadge-leg2">TP</span><span class="tt-coin" id="ttCoin-leg2">—</span></div>
+              <div class="tt-body"><span id="ttValue-leg2">0 SOL</span><span class="tt-pct" id="ttPct-leg2"></span></div>
+              <span class="tt-note" id="ttNote-leg2"></span>
+              <span class="t-time" id="ttTime-leg2">—</span>
+            </div>
           </div>
           <div class="params-inline">
             <span class="param-chip"><span class="k">TP</span><span class="v">$490k</span></span>
@@ -981,7 +1021,7 @@
                   <stop offset="0%" stop-color="#a855f7"/><stop offset="100%" stop-color="#26e37f"/>
                 </linearGradient>
               </defs>
-              <g id="gridLines-legacy"></g><g id="yLabels-legacy"></g>
+              <g id="gridLines-legacy"></g><g id="yLabels-legacy"></g><g id="xLabels-legacy"></g>
               <path id="areaPath-legacy" fill="url(#areaFill-legacy)" stroke="none"></path>
               <path id="linePath-legacy" fill="none" stroke="url(#lineStroke-legacy)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></path>
               <g id="dots-legacy"></g>
@@ -989,7 +1029,12 @@
               <circle id="hoverDot-legacy" r="4.5" fill="#0a0303" stroke="#26e37f" stroke-width="2" style="opacity:0;"></circle>
               <rect id="hitArea-legacy" x="0" y="0" width="760" height="180" fill="transparent"></rect>
             </svg>
-            <div class="tooltip" id="chartTooltip-legacy"><span id="ttValue-legacy">0 SOL</span><span class="t-time" id="ttTime-legacy">—</span></div>
+            <div class="tooltip no-trade" id="chartTooltip-legacy">
+              <div class="tt-head"><span class="tt-badge" id="ttBadge-legacy">TP</span><span class="tt-coin" id="ttCoin-legacy">—</span></div>
+              <div class="tt-body"><span id="ttValue-legacy">0 SOL</span><span class="tt-pct" id="ttPct-legacy"></span></div>
+              <span class="tt-note" id="ttNote-legacy"></span>
+              <span class="t-time" id="ttTime-legacy">—</span>
+            </div>
           </div>
           <div class="params-inline">
             <span class="param-chip"><span class="k">TP</span><span class="v">$490k</span></span>
@@ -1430,16 +1475,68 @@
       yLabels.appendChild(lbl);
     }
 
+    // x-axis: a tick for every point, but a text label only where it earns its
+    // keep (session start/end, and any point that represents a real TP/SL exit)
+    // so the axis stays readable instead of a wall of overlapping timestamps.
+    var xLabelsG = document.getElementById(ids.xLabels);
+    if (xLabelsG) {
+      data.forEach(function (d, i) {
+        var x = xAt(i);
+        var baseY = padT + plotH;
+        var tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        tick.setAttribute('x1', x); tick.setAttribute('x2', x);
+        tick.setAttribute('y1', baseY); tick.setAttribute('y2', baseY + 4);
+        tick.setAttribute('stroke', 'rgba(190,135,255,0.22)'); tick.setAttribute('stroke-width', '1');
+        xLabelsG.appendChild(tick);
+
+        var showLabel = d.label || d.trade || i === 0 || i === data.length - 1;
+        if (!showLabel) return;
+        var txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        var clampedX = Math.min(Math.max(x, padL + 14), W - padR - 14);
+        txt.setAttribute('x', clampedX); txt.setAttribute('y', baseY + 15);
+        txt.setAttribute('text-anchor', 'middle');
+        txt.setAttribute('class', 'chart-x-label');
+        txt.setAttribute('font-size', '9.5');
+        txt.textContent = d.t;
+        xLabelsG.appendChild(txt);
+      });
+    }
+
+    function trianglePoints(cx, cy, size, up) {
+      return up
+        ? (cx) + ',' + (cy - size) + ' ' + (cx - size) + ',' + (cy + size * 0.8) + ' ' + (cx + size) + ',' + (cy + size * 0.8)
+        : (cx) + ',' + (cy + size) + ' ' + (cx - size) + ',' + (cy - size * 0.8) + ' ' + (cx + size) + ',' + (cy - size * 0.8);
+    }
+
     var dotsG = document.getElementById(ids.dots);
     data.forEach(function (d, i) {
-      var c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      c.setAttribute('cx', xAt(i)); c.setAttribute('cy', yAt(d.v));
       var last = i === data.length - 1;
-      c.setAttribute('r', last ? 5 : 3);
-      c.setAttribute('fill', last ? '#26e37f' : '#0a0303');
-      c.setAttribute('stroke', last ? '#0a0303' : '#a855f7');
-      c.setAttribute('stroke-width', last ? 2 : 1.6);
-      dotsG.appendChild(c);
+      var x = xAt(i), y = yAt(d.v);
+      if (d.trade) {
+        var isTp = d.trade.kind === 'tp';
+        var color = isTp ? '#26e37f' : '#ff3b46';
+        var mark = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        mark.setAttribute('points', trianglePoints(x, y, last ? 6.5 : 5.5, isTp));
+        mark.setAttribute('fill', color);
+        mark.setAttribute('stroke', '#0a0303');
+        mark.setAttribute('stroke-width', '1.2');
+        dotsG.appendChild(mark);
+        if (last) {
+          var ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          ring.setAttribute('cx', x); ring.setAttribute('cy', y); ring.setAttribute('r', 10);
+          ring.setAttribute('fill', 'none'); ring.setAttribute('stroke', color);
+          ring.setAttribute('stroke-width', '1'); ring.setAttribute('opacity', '0.45');
+          dotsG.appendChild(ring);
+        }
+      } else {
+        var c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        c.setAttribute('cx', x); c.setAttribute('cy', y);
+        c.setAttribute('r', last ? 5 : 3);
+        c.setAttribute('fill', last ? '#26e37f' : '#0a0303');
+        c.setAttribute('stroke', last ? '#0a0303' : '#a855f7');
+        c.setAttribute('stroke-width', last ? 2 : 1.6);
+        dotsG.appendChild(c);
+      }
     });
 
     var svg = document.getElementById(ids.svg);
@@ -1448,6 +1545,10 @@
     var tooltip = document.getElementById(ids.tooltip);
     var ttValue = document.getElementById(ids.ttValue);
     var ttTime = document.getElementById(ids.ttTime);
+    var ttBadge = ids.ttBadge && document.getElementById(ids.ttBadge);
+    var ttCoin = ids.ttCoin && document.getElementById(ids.ttCoin);
+    var ttPct = ids.ttPct && document.getElementById(ids.ttPct);
+    var ttNote = ids.ttNote && document.getElementById(ids.ttNote);
     hoverLine.setAttribute('y2', padT + plotH);
 
     function nearestIndex(mx) {
@@ -1472,6 +1573,17 @@
       hoverDot.style.opacity = 1;
       ttValue.textContent = (d.v >= 0 ? '+' : '') + d.v.toFixed(2) + ' SOL';
       ttTime.textContent = d.t;
+      if (d.trade) {
+        tooltip.classList.remove('no-trade');
+        var isTp = d.trade.kind === 'tp';
+        if (ttBadge) { ttBadge.textContent = isTp ? 'TP' : 'SL'; ttBadge.className = 'tt-badge ' + (isTp ? 'tp' : 'sl'); }
+        if (ttCoin) ttCoin.textContent = d.trade.coin;
+        if (ttPct) { ttPct.textContent = d.trade.pct; ttPct.className = 'tt-pct ' + (isTp ? 'tp' : 'sl'); }
+        if (ttNote) ttNote.textContent = '';
+      } else {
+        tooltip.classList.add('no-trade');
+        if (ttNote) ttNote.textContent = d.note || '';
+      }
       tooltip.style.left = ((x / W) * 100) + '%';
       tooltip.style.top = ((y / H) * 100) + '%';
       tooltip.style.opacity = 1;
@@ -1484,18 +1596,29 @@
   }
 
   initEquityChart(
-    { svg: 'equitySvg', grid: 'gridLines', yLabels: 'yLabels', area: 'areaPath', line: 'linePath', dots: 'dots', hoverLine: 'hoverLine', hoverDot: 'hoverDot', hitArea: 'hitArea', tooltip: 'chartTooltip', ttValue: 'ttValue', ttTime: 'ttTime' },
+    {
+      svg: 'equitySvg', grid: 'gridLines', yLabels: 'yLabels', xLabels: 'xLabels', area: 'areaPath', line: 'linePath', dots: 'dots',
+      hoverLine: 'hoverLine', hoverDot: 'hoverDot', hitArea: 'hitArea', tooltip: 'chartTooltip',
+      ttValue: 'ttValue', ttTime: 'ttTime', ttBadge: 'ttBadge', ttCoin: 'ttCoin', ttPct: 'ttPct', ttNote: 'ttNote'
+    },
     [
-      { v: 0.00, t: '00:00 UTC' }, { v: -0.15, t: '03:47 UTC' }, { v: -0.15, t: '05:10 UTC' },
-      { v: 2.10, t: '07:22 UTC' }, { v: 2.00, t: '08:05 UTC' }, { v: 1.85, t: '09:14 UTC' },
-      { v: 1.85, t: '10:30 UTC' }, { v: 4.60, t: '11:57 UTC' }, { v: 4.50, t: '12:40 UTC' },
-      { v: 4.50, t: '13:10 UTC' }, { v: 2.84, t: '14:32 UTC' }
+      { v: 0.00, t: '00:00', label: true, note: 'Départ de session' },
+      { v: -0.15, t: '03:47', trade: { coin: '6kPzL…9Wdc', kind: 'sl', pct: '−22%' } },
+      { v: -0.15, t: '05:10', note: 'Aucune sortie · position en cours' },
+      { v: 2.10, t: '07:22', trade: { coin: 'Wr3Qd…7Bxk', kind: 'tp', pct: '+612%' } },
+      { v: 2.00, t: '08:35', trade: { coin: '9mZtV…c4Fp', kind: 'sl', pct: '−18%' } },
+      { v: 1.85, t: '10:49', trade: { coin: '3vBqW…7Tck', kind: 'sl', pct: '−38%' } },
+      { v: 1.85, t: '11:30', note: 'Aucune sortie · position en cours' },
+      { v: 4.60, t: '12:16', trade: { coin: 'Gm4ZQ…nR9x', kind: 'tp', pct: '+5 092%' } },
+      { v: 4.50, t: '13:05', trade: { coin: 'Nq5Ct…8Vmz', kind: 'sl', pct: '−9%' } },
+      { v: 4.50, t: '13:35', note: 'Aucune sortie · position en cours' },
+      { v: 2.84, t: '14:10', label: true, trade: { coin: '8jYwP…r6Ld', kind: 'sl', pct: '−31%' } }
     ],
     { h: 260 }
   );
 
   initEquityChart(
-    { svg: 'equitySvg-leg1', grid: 'gridLines-leg1', yLabels: 'yLabels-leg1', area: 'areaPath-leg1', line: 'linePath-leg1', dots: 'dots-leg1', hoverLine: 'hoverLine-leg1', hoverDot: 'hoverDot-leg1', hitArea: 'hitArea-leg1', tooltip: 'chartTooltip-leg1', ttValue: 'ttValue-leg1', ttTime: 'ttTime-leg1' },
+    { svg: 'equitySvg-leg1', grid: 'gridLines-leg1', yLabels: 'yLabels-leg1', xLabels: 'xLabels-leg1', area: 'areaPath-leg1', line: 'linePath-leg1', dots: 'dots-leg1', hoverLine: 'hoverLine-leg1', hoverDot: 'hoverDot-leg1', hitArea: 'hitArea-leg1', tooltip: 'chartTooltip-leg1', ttValue: 'ttValue-leg1', ttTime: 'ttTime-leg1' },
     [
       { v: 0.00, t: '00:00 UTC' }, { v: -0.08, t: '03:47 UTC' }, { v: -0.08, t: '05:10 UTC' },
       { v: 1.05, t: '07:22 UTC' }, { v: 1.00, t: '08:05 UTC' }, { v: 0.93, t: '09:14 UTC' },
@@ -1506,7 +1629,7 @@
   );
 
   initEquityChart(
-    { svg: 'equitySvg-leg2', grid: 'gridLines-leg2', yLabels: 'yLabels-leg2', area: 'areaPath-leg2', line: 'linePath-leg2', dots: 'dots-leg2', hoverLine: 'hoverLine-leg2', hoverDot: 'hoverDot-leg2', hitArea: 'hitArea-leg2', tooltip: 'chartTooltip-leg2', ttValue: 'ttValue-leg2', ttTime: 'ttTime-leg2' },
+    { svg: 'equitySvg-leg2', grid: 'gridLines-leg2', yLabels: 'yLabels-leg2', xLabels: 'xLabels-leg2', area: 'areaPath-leg2', line: 'linePath-leg2', dots: 'dots-leg2', hoverLine: 'hoverLine-leg2', hoverDot: 'hoverDot-leg2', hitArea: 'hitArea-leg2', tooltip: 'chartTooltip-leg2', ttValue: 'ttValue-leg2', ttTime: 'ttTime-leg2' },
     [
       { v: 0.00, t: '00:00 UTC' }, { v: -0.07, t: '03:47 UTC' }, { v: -0.07, t: '05:10 UTC' },
       { v: 1.05, t: '07:22 UTC' }, { v: 1.00, t: '08:05 UTC' }, { v: 0.92, t: '09:14 UTC' },
@@ -1517,7 +1640,7 @@
   );
 
   initEquityChart(
-    { svg: 'equitySvg-legacy', grid: 'gridLines-legacy', yLabels: 'yLabels-legacy', area: 'areaPath-legacy', line: 'linePath-legacy', dots: 'dots-legacy', hoverLine: 'hoverLine-legacy', hoverDot: 'hoverDot-legacy', hitArea: 'hitArea-legacy', tooltip: 'chartTooltip-legacy', ttValue: 'ttValue-legacy', ttTime: 'ttTime-legacy' },
+    { svg: 'equitySvg-legacy', grid: 'gridLines-legacy', yLabels: 'yLabels-legacy', xLabels: 'xLabels-legacy', area: 'areaPath-legacy', line: 'linePath-legacy', dots: 'dots-legacy', hoverLine: 'hoverLine-legacy', hoverDot: 'hoverDot-legacy', hitArea: 'hitArea-legacy', tooltip: 'chartTooltip-legacy', ttValue: 'ttValue-legacy', ttTime: 'ttTime-legacy' },
     [
       { v: 0.0, t: '2026-08-10' }, { v: 1.2, t: '2026-08-14' }, { v: 0.8, t: '2026-08-18' },
       { v: 3.5, t: '2026-08-22' }, { v: 5.1, t: '2026-08-27' }, { v: 4.6, t: '2026-08-31' },
