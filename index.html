@@ -242,6 +242,8 @@
   .tooltip .tt-pct.tp { color: var(--good); }
   .tooltip .tt-pct.sl { color: var(--critical); }
   .tooltip .tt-note { color: var(--text-muted); font-size: 10.5px; display: block; }
+  .tooltip .tt-link { color: var(--brand-red); font-size: 10.5px; font-weight: 600; margin-top: 5px; display: none; }
+  .tooltip.is-clickable .tt-link { display: block; }
 
   /* ---------- filter chips ---------- */
   .chip-row { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
@@ -732,6 +734,7 @@
           <div class="tt-body"><span id="ttValue">0 SOL</span><span class="tt-pct" id="ttPct"></span></div>
           <span class="tt-note" id="ttNote"></span>
           <span class="t-time" id="ttTime">—</span>
+          <span class="tt-link" id="ttLink">Cliquer pour voir la stratégie →</span>
         </div>
       </div>
       <div class="chart-legend">
@@ -862,6 +865,7 @@
               <div class="tt-body"><span id="ttValue-leg1">0 SOL</span><span class="tt-pct" id="ttPct-leg1"></span></div>
               <span class="tt-note" id="ttNote-leg1"></span>
               <span class="t-time" id="ttTime-leg1">—</span>
+              <span class="tt-link" id="ttLink-leg1">Cliquer pour voir la stratégie →</span>
             </div>
           </div>
           <div class="params-inline">
@@ -948,6 +952,7 @@
               <div class="tt-body"><span id="ttValue-leg2">0 SOL</span><span class="tt-pct" id="ttPct-leg2"></span></div>
               <span class="tt-note" id="ttNote-leg2"></span>
               <span class="t-time" id="ttTime-leg2">—</span>
+              <span class="tt-link" id="ttLink-leg2">Cliquer pour voir la stratégie →</span>
             </div>
           </div>
           <div class="params-inline">
@@ -1034,6 +1039,7 @@
               <div class="tt-body"><span id="ttValue-legacy">0 SOL</span><span class="tt-pct" id="ttPct-legacy"></span></div>
               <span class="tt-note" id="ttNote-legacy"></span>
               <span class="t-time" id="ttTime-legacy">—</span>
+              <span class="tt-link" id="ttLink-legacy">Cliquer pour voir la stratégie →</span>
             </div>
           </div>
           <div class="params-inline">
@@ -1549,7 +1555,9 @@
     var ttCoin = ids.ttCoin && document.getElementById(ids.ttCoin);
     var ttPct = ids.ttPct && document.getElementById(ids.ttPct);
     var ttNote = ids.ttNote && document.getElementById(ids.ttNote);
+    var ttLink = ids.ttLink && document.getElementById(ids.ttLink);
     hoverLine.setAttribute('y2', padT + plotH);
+    var hoveredIndex = -1;
 
     function nearestIndex(mx) {
       var best = 0, bestDist = Infinity;
@@ -1565,6 +1573,7 @@
       var clientX = evt.touches ? evt.touches[0].clientX : evt.clientX;
       var mx = ((clientX - rect.left) / rect.width) * W;
       var i = nearestIndex(mx);
+      hoveredIndex = i;
       var d = data[i];
       var x = xAt(i), y = yAt(d.v);
       hoverLine.setAttribute('x1', x); hoverLine.setAttribute('x2', x);
@@ -1573,6 +1582,9 @@
       hoverDot.style.opacity = 1;
       ttValue.textContent = (d.v >= 0 ? '+' : '') + d.v.toFixed(2) + ' SOL';
       ttTime.textContent = d.t;
+      var clickable = !!(d.trade && d.trade.strategy);
+      svg.style.cursor = clickable ? 'pointer' : '';
+      tooltip.classList.toggle('is-clickable', clickable);
       if (d.trade) {
         tooltip.classList.remove('no-trade');
         var isTp = d.trade.kind === 'tp';
@@ -1588,9 +1600,18 @@
       tooltip.style.top = ((y / H) * 100) + '%';
       tooltip.style.opacity = 1;
     }
-    function onLeave() { hoverLine.style.opacity = 0; hoverDot.style.opacity = 0; tooltip.style.opacity = 0; }
+    function onLeave() { hoverLine.style.opacity = 0; hoverDot.style.opacity = 0; tooltip.style.opacity = 0; svg.style.cursor = ''; }
+    function onClick() {
+      if (hoveredIndex < 0) return;
+      var d = data[hoveredIndex];
+      if (d.trade && d.trade.strategy) {
+        activateTab('strategy');
+        openStrategy(d.trade.strategy);
+      }
+    }
     svg.addEventListener('mousemove', onMove);
     svg.addEventListener('mouseleave', onLeave);
+    svg.addEventListener('click', onClick);
     svg.addEventListener('touchmove', onMove, { passive: true });
     svg.addEventListener('touchend', onLeave);
   }
@@ -1599,20 +1620,20 @@
     {
       svg: 'equitySvg', grid: 'gridLines', yLabels: 'yLabels', xLabels: 'xLabels', area: 'areaPath', line: 'linePath', dots: 'dots',
       hoverLine: 'hoverLine', hoverDot: 'hoverDot', hitArea: 'hitArea', tooltip: 'chartTooltip',
-      ttValue: 'ttValue', ttTime: 'ttTime', ttBadge: 'ttBadge', ttCoin: 'ttCoin', ttPct: 'ttPct', ttNote: 'ttNote'
+      ttValue: 'ttValue', ttTime: 'ttTime', ttBadge: 'ttBadge', ttCoin: 'ttCoin', ttPct: 'ttPct', ttNote: 'ttNote', ttLink: 'ttLink'
     },
     [
       { v: 0.00, t: '00:00', label: true, note: 'Départ de session' },
-      { v: -0.15, t: '03:47', trade: { coin: '6kPzL…9Wdc', kind: 'sl', pct: '−22%' } },
+      { v: -0.15, t: '03:47', trade: { coin: '$APEX', kind: 'sl', pct: '−14%', strategy: 'leg1' } },
       { v: -0.15, t: '05:10', note: 'Aucune sortie · position en cours' },
-      { v: 2.10, t: '07:22', trade: { coin: 'Wr3Qd…7Bxk', kind: 'tp', pct: '+612%' } },
-      { v: 2.00, t: '08:35', trade: { coin: '9mZtV…c4Fp', kind: 'sl', pct: '−18%' } },
-      { v: 1.85, t: '10:49', trade: { coin: '3vBqW…7Tck', kind: 'sl', pct: '−38%' } },
+      { v: 2.10, t: '07:22', trade: { coin: '$TURBO', kind: 'tp', pct: '+612%', strategy: 'leg1' } },
+      { v: 2.00, t: '09:20', trade: { coin: '$NUKE', kind: 'sl', pct: '−22%', strategy: 'leg1' } },
+      { v: 1.85, t: '10:49', trade: { coin: '$FROGGY', kind: 'sl', pct: '−38%', strategy: 'leg1' } },
       { v: 1.85, t: '11:30', note: 'Aucune sortie · position en cours' },
-      { v: 4.60, t: '12:16', trade: { coin: 'Gm4ZQ…nR9x', kind: 'tp', pct: '+5 092%' } },
-      { v: 4.50, t: '13:05', trade: { coin: 'Nq5Ct…8Vmz', kind: 'sl', pct: '−9%' } },
+      { v: 4.60, t: '12:16', trade: { coin: '$ROCKET', kind: 'tp', pct: '+5 092%', strategy: 'leg1' } },
+      { v: 4.50, t: '13:05', trade: { coin: '$YOLO', kind: 'sl', pct: '−9%', strategy: 'leg1' } },
       { v: 4.50, t: '13:35', note: 'Aucune sortie · position en cours' },
-      { v: 2.84, t: '14:10', label: true, trade: { coin: '8jYwP…r6Ld', kind: 'sl', pct: '−31%' } }
+      { v: 2.84, t: '14:10', label: true, trade: { coin: '$RUGGED', kind: 'sl', pct: '−31%', strategy: 'leg1' } }
     ],
     { h: 260 }
   );
