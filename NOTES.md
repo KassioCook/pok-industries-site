@@ -8,12 +8,21 @@ aucun lien avec son dépôt git. Ce dossier ne contient que le site (design).
 - `index.html` — la page complète (HTML + CSS + JS, un seul fichier, aucune dépendance
   sauf les polices Google Fonts (Sora, IBM Plex Mono) et l'image de fond).
 - `bg.jpg` — l'image de fond (supercars néon rouge/noir), référencée en relatif par `index.html`.
-- Aperçu en ligne (Claude Artifact, se met à jour à chaque session) :
-  https://claude.ai/artifact/Cu75S2iMauCqD2hmtAZ5Zs
+- **Site en ligne (démo visuelle réelle, GitHub Pages)** :
+  https://kassiocook.github.io/pok-industries-site/
+  Dépôt : https://github.com/KassioCook/pok-industries-site (public, indépendant du dépôt du bot).
+  Contient un `.nojekyll` (sinon le build GitHub Pages échoue sur ce repo).
+- Aperçu Claude Artifact (moins fiable pour tester le scroll — rendu dans un iframe qui
+  s'auto-dimensionne, donc certains effets liés au scroll de page n'y fonctionnent pas
+  pareil que sur le vrai site) : https://claude.ai/artifact/Cu75S2iMauCqD2hmtAZ5Zs
 
 Pour prévisualiser en local : double-clic sur `index.html`, ça s'ouvre dans le navigateur.
 Toutes les données affichées sont **fictives** (mockup) — voir la section "Pour brancher
 sur le vrai bot" plus bas.
+
+Décision (2026-09-17) : on reste sur la démo visuelle statique (GitHub Pages) tant que le
+design n'est pas figé — pas de branchement sur le vrai bot pour l'instant, voir la section
+"Pour brancher sur le vrai bot" plus bas pour ce que ça demanderait.
 
 ## Ce qui existe déjà (état actuel du mockup)
 
