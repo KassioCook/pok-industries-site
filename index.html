@@ -2239,7 +2239,12 @@
   // "Importer" creates a real Tâches card + Stratégie tile/detail for it, wired
   // through the exact same applyOverride/openStrategy/openEditModal machinery
   // used by the built-in strategies, so it behaves identically once imported. ----
-  var backtestCatalog = [
+  // demoCatalog never changes — it's what keeps the Importation tab looking
+  // alive even when nothing real has landed yet. backtestCatalog is what
+  // actually renders: demoCatalog plus whatever /api/strategies returns, so a
+  // real import from the backtest tool adds to the list instead of hiding
+  // the demo cards behind it.
+  var demoCatalog = [
     {
       key: 'bt_scalp_v2', name: 'Scalp rapide V2', winrate: 68, pnl: '+1,240%', trades: 312,
       tp: '$180k', sl: '$9k', slip: '80% / 25%', stake: '0.05',
@@ -2256,6 +2261,7 @@
       desc: 'Backtest le plus sélectif des trois : filtre supplémentaire sur la liquidité avant d’acheter (évite les tokens facilement "rug"), moins de trades mais meilleur taux de réussite. TP $300k / SL $12k, mise plus grosse (0.08 SOL) vu le taux de réussite plus élevé.'
     }
   ];
+  var backtestCatalog = demoCatalog.slice();
 
   var importedBacktests = [];
   try { importedBacktests = JSON.parse(localStorage.getItem('b10k_imported_backtests') || '[]'); } catch (e) {}
@@ -2430,7 +2436,7 @@
       .then(function (r) { if (!r.ok) throw new Error('api not available'); return r.json(); })
       .then(function (data) {
         if (data && Array.isArray(data.strategies)) {
-          backtestCatalog = data.strategies;
+          backtestCatalog = demoCatalog.concat(data.strategies);
           renderImportList();
           refreshImportTabBadge();
           replayImportedStrategies();
