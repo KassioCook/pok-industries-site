@@ -625,6 +625,31 @@
   .import-link { background: none; border: none; padding: 0; color: var(--brand-red); font-family: var(--font-display); font-size: 12px; font-weight: 600; cursor: pointer; }
   .import-link:hover { text-decoration: underline; }
 
+  /* ---------- import progress modal ---------- */
+  .import-progress-card { max-width: 460px; }
+  .import-progress-track {
+    position: relative; height: 7px; border-radius: 4px; background: var(--surface-2); overflow: hidden;
+  }
+  .import-progress-fill {
+    height: 100%; width: 0%; border-radius: 4px; background: linear-gradient(90deg, var(--brand-red), var(--good));
+    transition: width 0.35s ease;
+  }
+  .import-progress-pct {
+    align-self: flex-end; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); margin-top: -8px;
+  }
+  .import-log {
+    background: #05030a; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px;
+    height: 170px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px;
+  }
+  .import-log-line {
+    font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); display: flex; gap: 7px;
+    opacity: 0; transform: translateY(3px); animation: importLogIn 0.25s ease forwards;
+  }
+  @keyframes importLogIn { to { opacity: 1; transform: translateY(0); } }
+  .import-log-line .lg-mark { color: var(--text-muted); flex: none; }
+  .import-log-line.is-done .lg-mark { color: var(--good); }
+  .import-log-line.is-final { color: var(--good); font-weight: 600; }
+
   /* ---------- edit config modal ---------- */
   .modal-overlay {
     position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center;
@@ -1434,6 +1459,19 @@
     <div class="cal-grid" id="calGrid"></div>
 
     <div class="cal-streaks" id="calStreaks"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="importProgressModal" hidden>
+  <div class="modal-card import-progress-card">
+    <h3 class="modal-title" id="importProgressTitle">Importation de la stratégie</h3>
+    <div class="import-progress-track"><div class="import-progress-fill" id="importProgressFill"></div></div>
+    <span class="import-progress-pct" id="importProgressPct">0%</span>
+    <div class="import-log" id="importLog"></div>
+    <div class="modal-actions">
+      <button type="button" class="toolbar-btn" id="importProgressCloseBtn" hidden>Fermer</button>
+      <button type="button" class="toolbar-btn primary" id="importProgressGotoBtn" hidden>Voir dans Tâches →</button>
+    </div>
   </div>
 </div>
 
@@ -2403,19 +2441,86 @@
   refreshCatalogFromApi();
   setInterval(refreshCatalogFromApi, 20000);
 
-  var importList = document.getElementById('importList');
-  if (importList) {
-    importList.addEventListener('click', function (evt) {
-      var importBtn = evt.target.closest('[data-import]');
-      if (importBtn) {
-        var bt = backtestCatalog.filter(function (b) { return b.key === importBtn.getAttribute('data-import'); })[0];
-        if (bt) { importBacktest(bt); renderImportList(); }
-        return;
-      }
-      var gotoBtn = evt.target.closest('[data-goto]');
-      if (gotoBtn) { activateTab('tasks'); }
-    });
-  }
+  // ---- import: animated progress + log feed while a backtest is pulled in ----
+  (function () {
+    var modal = document.getElementById('importProgressModal');
+    var titleEl = document.getElementById('importProgressTitle');
+    var fillEl = document.getElementById('importProgressFill');
+    var pctEl = document.getElementById('importProgressPct');
+    var logEl = document.getElementById('importLog');
+    var closeBtn = document.getElementById('importProgressCloseBtn');
+    var gotoBtn = document.getElementById('importProgressGotoBtn');
+    if (!modal) return;
+
+    function stepsFor(bt) {
+      return [
+        'Connexion à /api/import…',
+        'Authentification de la clé backtest…',
+        'Réception du payload : ' + bt.trades + ' trades simulés, winrate ' + bt.winrate + '%',
+        'Validation des paramètres (TP ' + bt.tp + ' / SL ' + bt.sl + ', slippage ' + bt.slip + ')…',
+        'Création de la tâche de copy-trade « ' + bt.name + ' »…',
+        'Génération de la fiche Stratégie…',
+        'Import terminé — stratégie prête dans l’onglet Tâches'
+      ];
+    }
+
+    function addLogLine(text, cls) {
+      var line = document.createElement('div');
+      line.className = 'import-log-line' + (cls ? ' ' + cls : '');
+      line.innerHTML = '<span class="lg-mark">' + (cls === 'is-final' ? '✓' : '›') + '</span><span>' + text + '</span>';
+      logEl.appendChild(line);
+      logEl.scrollTop = logEl.scrollHeight;
+      return line;
+    }
+
+    function runImportAnimation(bt, onDone) {
+      titleEl.textContent = 'Importation — ' + bt.name;
+      fillEl.style.width = '0%';
+      pctEl.textContent = '0%';
+      logEl.innerHTML = '';
+      closeBtn.hidden = true;
+      gotoBtn.hidden = true;
+      modal.hidden = false;
+
+      var steps = stepsFor(bt);
+      steps.forEach(function (text, i) {
+        setTimeout(function () {
+          var isFinal = i === steps.length - 1;
+          var pct = Math.round(((i + 1) / steps.length) * 100);
+          addLogLine(text, isFinal ? 'is-final' : 'is-done');
+          fillEl.style.width = pct + '%';
+          pctEl.textContent = pct + '%';
+          if (isFinal) {
+            onDone();
+            closeBtn.hidden = false;
+            gotoBtn.hidden = false;
+          }
+        }, 380 + i * 420);
+      });
+    }
+
+    function closeModal() { modal.hidden = true; }
+    closeBtn.addEventListener('click', closeModal);
+    gotoBtn.addEventListener('click', function () { closeModal(); activateTab('tasks'); });
+    modal.addEventListener('click', function (evt) { if (evt.target === modal && !closeBtn.hidden) closeModal(); });
+
+    var importList = document.getElementById('importList');
+    if (importList) {
+      importList.addEventListener('click', function (evt) {
+        var importBtn = evt.target.closest('[data-import]');
+        if (importBtn) {
+          var bt = backtestCatalog.filter(function (b) { return b.key === importBtn.getAttribute('data-import'); })[0];
+          if (bt) {
+            importBtn.disabled = true;
+            runImportAnimation(bt, function () { importBacktest(bt); renderImportList(); });
+          }
+          return;
+        }
+        var gotoListBtn = evt.target.closest('[data-goto]');
+        if (gotoListBtn) { activateTab('tasks'); }
+      });
+    }
+  })();
 
   // ---- copy wallet address ----
   document.addEventListener('click', function (evt) {
