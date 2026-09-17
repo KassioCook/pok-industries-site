@@ -44,23 +44,9 @@
     background: var(--bg-plane);
     display: flex; align-items: center; justify-content: center;
   }
-  /* wraps the <img> so it shrinks to fit and is never upscaled/blurred or cropped —
-     its box exactly matches the rendered image, which is what lets .bg-spot
-     percentages line up with the cars regardless of viewport size */
+  /* wraps the <img> so it shrinks to fit and is never upscaled/blurred or cropped */
   .bg-photo-frame { position: relative; max-width: 100%; max-height: 100%; line-height: 0; }
   .bg-photo { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; }
-  .bg-spot {
-    position: absolute; transform: translate(-50%, -50%); border-radius: 50%;
-    pointer-events: none; mix-blend-mode: screen; filter: blur(3px);
-  }
-  .bg-spot-lambo {
-    left: 27%; top: 60%; width: 30%; height: 58%;
-    background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(255,205,150,0.55), rgba(255,90,60,0.24) 45%, transparent 72%);
-  }
-  .bg-spot-mclaren {
-    left: 74%; top: 62%; width: 26%; height: 46%;
-    background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(255,205,150,0.5), rgba(255,90,60,0.22) 45%, transparent 72%);
-  }
   .bg-tint {
     position: fixed; inset: 0; z-index: -1; pointer-events: none;
     background-image:
@@ -624,8 +610,6 @@
 <div class="bg-layer">
   <div class="bg-photo-frame">
     <img class="bg-photo" src="bg.jpg" alt="" aria-hidden="true">
-    <span class="bg-spot bg-spot-lambo" aria-hidden="true"></span>
-    <span class="bg-spot bg-spot-mclaren" aria-hidden="true"></span>
   </div>
 </div>
 <div class="bg-tint" aria-hidden="true"></div>
