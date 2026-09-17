@@ -14,13 +14,20 @@ aucun lien avec son dépôt git. Ce dossier ne contient que le site (design).
   utilise `fetch` global de Node.
 - `api/strategies.js` — fonction serverless Vercel : `GET /api/strategies`, lue par
   l'onglet Importation du site pour afficher les stratégies reçues via `/api/import`.
-- **Site en ligne (démo visuelle réelle, GitHub Pages — statique, sans `/api`)** :
+- **Site en ligne sur Vercel (celui qui a l'import réel qui marche)** :
+  https://pok-industries-site.vercel.app
+  Projet Vercel relié à ce même dépôt GitHub, avec une base **KV** connectée et
+  la variable d'environnement `IMPORT_API_KEY` configurée (mise en place et
+  testée avec succès le 2026-09-17 — `POST /api/import` renvoie `201`, `GET
+  /api/strategies` renvoie la liste). **C'est cette URL qu'il faut donner à
+  l'ami**, pas celle de GitHub Pages ci-dessous.
+- **Ancien site en ligne (démo visuelle, GitHub Pages — statique, sans `/api`)** :
   https://kassiocook.github.io/pok-industries-site/
   Dépôt : https://github.com/KassioCook/pok-industries-site (public, indépendant du dépôt du bot).
   Contient un `.nojekyll` (sinon le build GitHub Pages échoue sur ce repo).
   ⚠️ GitHub Pages ne sert que du statique : `/api/import` et `/api/strategies` n'y
-  fonctionnent pas. Il faut déployer sur Vercel (voir plus bas) pour que l'import
-  depuis le backtest de l'ami marche réellement.
+  fonctionnent pas. Gardé en ligne mais l'URL Vercel ci-dessus est la référence
+  à jour désormais.
 - Aperçu Claude Artifact (moins fiable pour tester le scroll — rendu dans un iframe qui
   s'auto-dimensionne, donc certains effets liés au scroll de page n'y fonctionnent pas
   pareil que sur le vrai site) : https://claude.ai/artifact/Cu75S2iMauCqD2hmtAZ5Zs
@@ -149,11 +156,19 @@ propre bot de trading, et (2) relie son site de backtest à celui-ci, pour qu'un
 clic sur une stratégie backtestée l'importe directement ici (onglet Importation
 → Tâches/Stratégie), sans que l'utilisateur touche à son propre bot.
 
-Ce qui est fait côté code : `api/import.js` (écriture) + `api/strategies.js`
+**✅ Fait et testé le 2026-09-17** : projet Vercel créé (relié à ce dépôt), base
+KV créée et connectée, `IMPORT_API_KEY` configurée (type "Secret", les 3
+environnements), redéployé. Test réel : `POST /api/import` → `201`, `GET
+/api/strategies` → renvoie bien la stratégie. **Reste à faire** : nettoyer
+l'entrée de test ("TEST — à supprimer") via Storage → la base KV → Data
+Browser → supprimer/vider la clé `strategies`. Le token `IMPORT_API_KEY` actif
+n'est pas noté ici (public) — il est dans les variables d'environnement Vercel
+du projet ; le redonner à l'ami par un canal privé si besoin de le re-générer.
+
+Ce qui a été construit côté code : `api/import.js` (écriture) + `api/strategies.js`
 (lecture), stockage dans **Vercel KV** (Redis via l'API REST Upstash, appelée en
-`fetch` brut — aucune dépendance npm ajoutée). Ce qui reste **à faire à la main**,
-dans le dashboard Vercel (pas quelque chose que Claude peut faire à la place de
-l'utilisateur, ça touche à son compte) :
+`fetch` brut — aucune dépendance npm ajoutée). Étapes suivies pour la mise en place
+(pour référence si à refaire sur un autre projet) :
 
 1. **Créer un projet Vercel** relié à ce dépôt GitHub
    (`KassioCook/pok-industries-site`) — importer depuis vercel.com/new.
@@ -161,19 +176,20 @@ l'utilisateur, ça touche à son compte) :
    connecter au projet. Ça injecte automatiquement `KV_REST_API_URL` et
    `KV_REST_API_TOKEN` dans les variables d'environnement.
 3. Ajouter une variable d'environnement **`IMPORT_API_KEY`** (Settings →
-   Environment Variables) — c'est la clé secrète que seul le backtest de l'ami
-   doit connaître pour pouvoir écrire ici. **Ne jamais mettre sa valeur dans ce
-   fichier ni ailleurs dans le dépôt : il est public.** La générer soi-même,
-   par ex. `openssl rand -hex 24`, et la coller uniquement dans le dashboard
-   Vercel (+ la transmettre à l'ami par un canal privé, pas par ce repo).
+   Environment Variables, type **Secret**) — c'est la clé secrète que seul le
+   backtest de l'ami doit connaître pour pouvoir écrire ici. **Ne jamais mettre
+   sa valeur dans ce fichier ni ailleurs dans le dépôt : il est public.** La
+   générer soi-même, par ex. `openssl rand -hex 24`, et la coller uniquement
+   dans le dashboard Vercel (+ la transmettre à l'ami par un canal privé, pas
+   par ce repo).
 4. Redéployer (un push suffit, ou "Redeploy" dans le dashboard) pour que les
    variables d'environnement prennent effet.
-5. Donner à l'ami : l'URL de son futur endpoint (`https://<domaine-vercel>/api/import`),
-   la clé ci-dessus, et le format ci-dessous.
+5. Donner à l'ami : l'URL de l'endpoint (`https://pok-industries-site.vercel.app/api/import`),
+   la clé, et le format ci-dessous.
 
 **Format attendu par `POST /api/import`** (depuis le backtest de l'ami) :
 ```
-POST https://<domaine-vercel>/api/import
+POST https://pok-industries-site.vercel.app/api/import
 Content-Type: application/json
 x-api-key: <IMPORT_API_KEY>
 
