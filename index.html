@@ -458,6 +458,7 @@
   .avatar.a4 { background-image: repeating-linear-gradient(45deg, var(--text-muted) 0 6px, #241f1e 6px 12px); }
   .wallet-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
   .wallet-text .w-mono { font-family: var(--font-mono); font-size: 12px; color: var(--text-primary); }
+  .wallet-role { font-size: 9.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; font-weight: 600; }
   .copy-btn {
     background: none; border: none; padding: 2px; margin-left: 2px; color: var(--text-muted); cursor: pointer;
     display: inline-flex; vertical-align: -2px; border-radius: 4px;
@@ -493,6 +494,29 @@
   .icon-btn.toggle-on { color: var(--good); border-color: rgba(38,227,127,0.4); }
   .icon-btn.toggle-off { color: var(--amber); border-color: rgba(255,171,46,0.4); }
   .icon-btn.danger:hover { color: var(--critical); border-color: rgba(255,59,70,0.5); }
+
+  /* ---------- edit config modal ---------- */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center;
+    background: rgba(5,2,3,0.72); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); padding: 20px;
+  }
+  .modal-overlay[hidden] { display: none; }
+  .modal-card {
+    width: 100%; max-width: 380px; background: var(--surface-3); border: 1px solid var(--border-strong);
+    border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 14px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.55); font-family: var(--font-display);
+  }
+  .modal-title { font-size: 15px; font-weight: 700; margin: 0; color: var(--text-primary); }
+  .modal-field { display: flex; flex-direction: column; gap: 6px; }
+  .modal-field label {
+    font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; font-weight: 600;
+  }
+  .modal-field input {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 9px; padding: 9px 11px;
+    color: var(--text-primary); font-family: var(--font-mono); font-size: 13px; outline: none;
+  }
+  .modal-field input:focus { border-color: var(--brand-red); }
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
 
   footer {
     margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-muted);
@@ -1035,7 +1059,7 @@
               <span class="status-pill on">● ACTIVE</span>
               <div class="row-actions">
                 <button class="icon-btn toggle-on" data-toggle title="Arrêter">■</button>
-                <button class="icon-btn" title="Modifier">✎</button>
+                <button class="icon-btn" data-edit title="Modifier">✎</button>
                 <button class="icon-btn" title="Dupliquer">⧉</button>
                 <button class="icon-btn danger" title="Supprimer">🗑</button>
               </div>
@@ -1044,12 +1068,18 @@
           <div class="task-card-wallets">
             <div class="wallet-cell">
               <div class="avatar a1"></div>
-              <div class="wallet-text"><span class="w-mono">9kLp…f2Qa<button class="copy-btn" data-copy="9kLpXhZ2rT8mQeVn4uYw6JcB1sD3fGa5f2Qa" title="Copier">⧉</button></span></div>
+              <div class="wallet-text">
+                <span class="wallet-role">Wallet acheteur</span>
+                <span class="w-mono">9kLp…f2Qa<button class="copy-btn" data-copy="9kLpXhZ2rT8mQeVn4uYw6JcB1sD3fGa5f2Qa" title="Copier">⧉</button></span>
+              </div>
             </div>
             <span class="arrow">→</span>
             <div class="wallet-cell">
               <div class="avatar a4"></div>
-              <div class="wallet-text"><span class="w-mono">5JTv…DFXd<button class="copy-btn" data-copy="5JTvwLFy1EPWoSWbVqjp4x9rfg961P9iKV3vsSubDFXd" title="Copier">⧉</button></span></div>
+              <div class="wallet-text">
+                <span class="wallet-role">Wallet cible (suivi)</span>
+                <span class="w-mono">5JTv…DFXd<button class="copy-btn" data-copy="5JTvwLFy1EPWoSWbVqjp4x9rfg961P9iKV3vsSubDFXd" title="Copier">⧉</button></span>
+              </div>
             </div>
           </div>
           <div class="params-inline">
@@ -1073,7 +1103,7 @@
               <span class="status-pill on">● ACTIVE</span>
               <div class="row-actions">
                 <button class="icon-btn toggle-on" data-toggle title="Arrêter">■</button>
-                <button class="icon-btn" title="Modifier">✎</button>
+                <button class="icon-btn" data-edit title="Modifier">✎</button>
                 <button class="icon-btn" title="Dupliquer">⧉</button>
                 <button class="icon-btn danger" title="Supprimer">🗑</button>
               </div>
@@ -1082,12 +1112,18 @@
           <div class="task-card-wallets">
             <div class="wallet-cell">
               <div class="avatar a2"></div>
-              <div class="wallet-text"><span class="w-mono">Bq7T…m3Wc<button class="copy-btn" data-copy="Bq7TnKpXe4Ls9RyD2mZaC6vFh8UjQw1oNb3m3Wc" title="Copier">⧉</button></span></div>
+              <div class="wallet-text">
+                <span class="wallet-role">Wallet acheteur</span>
+                <span class="w-mono">Bq7T…m3Wc<button class="copy-btn" data-copy="Bq7TnKpXe4Ls9RyD2mZaC6vFh8UjQw1oNb3m3Wc" title="Copier">⧉</button></span>
+              </div>
             </div>
             <span class="arrow">→</span>
             <div class="wallet-cell">
               <div class="avatar a4"></div>
-              <div class="wallet-text"><span class="w-mono">5JTv…DFXd<button class="copy-btn" data-copy="5JTvwLFy1EPWoSWbVqjp4x9rfg961P9iKV3vsSubDFXd" title="Copier">⧉</button></span></div>
+              <div class="wallet-text">
+                <span class="wallet-role">Wallet cible (suivi)</span>
+                <span class="w-mono">5JTv…DFXd<button class="copy-btn" data-copy="5JTvwLFy1EPWoSWbVqjp4x9rfg961P9iKV3vsSubDFXd" title="Copier">⧉</button></span>
+              </div>
             </div>
           </div>
           <div class="params-inline">
@@ -1111,7 +1147,7 @@
               <span class="status-pill off">○ INACTIVE</span>
               <div class="row-actions">
                 <button class="icon-btn toggle-off" data-toggle title="Démarrer">▶</button>
-                <button class="icon-btn" title="Modifier">✎</button>
+                <button class="icon-btn" data-edit title="Modifier">✎</button>
                 <button class="icon-btn" title="Dupliquer">⧉</button>
                 <button class="icon-btn danger" title="Supprimer">🗑</button>
               </div>
@@ -1120,12 +1156,18 @@
           <div class="task-card-wallets">
             <div class="wallet-cell">
               <div class="avatar a3"></div>
-              <div class="wallet-text"><span class="w-mono">Fx2K…q8Zn<button class="copy-btn" data-copy="Fx2KpRmT7bYh4NqXe9VcL1sD6jGa3wFo8q8Zn" title="Copier">⧉</button></span></div>
+              <div class="wallet-text">
+                <span class="wallet-role">Wallet acheteur</span>
+                <span class="w-mono">Fx2K…q8Zn<button class="copy-btn" data-copy="Fx2KpRmT7bYh4NqXe9VcL1sD6jGa3wFo8q8Zn" title="Copier">⧉</button></span>
+              </div>
             </div>
             <span class="arrow">→</span>
             <div class="wallet-cell">
               <div class="avatar a4"></div>
-              <div class="wallet-text"><span class="w-mono">5JTv…DFXd<button class="copy-btn" data-copy="5JTvwLFy1EPWoSWbVqjp4x9rfg961P9iKV3vsSubDFXd" title="Copier">⧉</button></span></div>
+              <div class="wallet-text">
+                <span class="wallet-role">Wallet cible (suivi)</span>
+                <span class="w-mono">5JTv…DFXd<button class="copy-btn" data-copy="5JTvwLFy1EPWoSWbVqjp4x9rfg961P9iKV3vsSubDFXd" title="Copier">⧉</button></span>
+              </div>
             </div>
           </div>
           <div class="params-inline">
@@ -1143,6 +1185,24 @@
   </section>
 
 
+</div>
+
+<div class="modal-overlay" id="taskEditModal" hidden>
+  <form class="modal-card" id="taskEditForm">
+    <h3 class="modal-title">Modifier la config</h3>
+    <div class="modal-field">
+      <label for="editCfgName">Nom de la stratégie</label>
+      <input type="text" id="editCfgName" required>
+    </div>
+    <div class="modal-field">
+      <label for="editBuyWallet">Wallet acheteur (celui qui buy)</label>
+      <input type="text" id="editBuyWallet" required spellcheck="false">
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="toolbar-btn" id="editCancelBtn">Annuler</button>
+      <button type="submit" class="toolbar-btn primary">Enregistrer</button>
+    </div>
+  </form>
 </div>
 
 <script>
@@ -1486,6 +1546,32 @@
   }
   renderLiveTrades();
 
+  // ---- tasks: edits (name + buy wallet) persisted per strategy in localStorage ----
+  function shortWallet(addr) {
+    addr = addr.trim();
+    return addr.length > 10 ? addr.slice(0, 4) + '…' + addr.slice(-4) : addr;
+  }
+  var taskOverrides = {};
+  try { taskOverrides = JSON.parse(localStorage.getItem('b10k_task_overrides') || '{}'); } catch (e) {}
+  function applyOverride(row, ov) {
+    if (ov.name) {
+      var nameEl = row.querySelector('.cfg-name b');
+      if (nameEl) nameEl.textContent = ov.name;
+    }
+    if (ov.buyWallet) {
+      var mono = row.querySelector('.wallet-cell .w-mono');
+      var copyBtn = mono ? mono.querySelector('.copy-btn') : null;
+      if (mono) {
+        mono.firstChild.textContent = shortWallet(ov.buyWallet);
+        if (copyBtn) copyBtn.setAttribute('data-copy', ov.buyWallet);
+      }
+    }
+  }
+  document.querySelectorAll('.task-card').forEach(function (row) {
+    var ov = taskOverrides[row.dataset.strategy];
+    if (ov) applyOverride(row, ov);
+  });
+
   // ---- tasks: search ----
   var taskSearch = document.getElementById('taskSearch');
   var taskBody = document.getElementById('taskBody');
@@ -1525,6 +1611,11 @@
         setRowStatus(row, row.dataset.status !== 'on');
         return;
       }
+      var editBtn = evt.target.closest('[data-edit]');
+      if (editBtn) {
+        openEditModal(editBtn.closest('.task-card'));
+        return;
+      }
       // two explicit, distinct buttons — clicking one sets it active and disarms its sibling
       var modeBtn = evt.target.closest('.mode-btn');
       if (modeBtn && !modeBtn.classList.contains('is-active')) {
@@ -1532,6 +1623,53 @@
         group.querySelectorAll('.mode-btn').forEach(function (b) { b.classList.remove('is-active'); });
         modeBtn.classList.add('is-active');
       }
+    });
+  }
+
+  // ---- tasks: edit modal ----
+  var taskEditModal = document.getElementById('taskEditModal');
+  var taskEditForm = document.getElementById('taskEditForm');
+  var editCfgName = document.getElementById('editCfgName');
+  var editBuyWallet = document.getElementById('editBuyWallet');
+  var editCancelBtn = document.getElementById('editCancelBtn');
+  var editingRow = null;
+
+  function openEditModal(row) {
+    if (!taskEditModal || !row) return;
+    editingRow = row;
+    var nameEl = row.querySelector('.cfg-name b');
+    var mono = row.querySelector('.wallet-cell .w-mono');
+    var copyBtn = mono ? mono.querySelector('.copy-btn') : null;
+    editCfgName.value = nameEl ? nameEl.textContent.trim() : '';
+    editBuyWallet.value = copyBtn ? (copyBtn.getAttribute('data-copy') || '') : '';
+    taskEditModal.hidden = false;
+    editCfgName.focus();
+  }
+  function closeEditModal() {
+    if (taskEditModal) taskEditModal.hidden = true;
+    editingRow = null;
+  }
+  if (editCancelBtn) editCancelBtn.addEventListener('click', closeEditModal);
+  if (taskEditModal) {
+    taskEditModal.addEventListener('click', function (evt) {
+      if (evt.target === taskEditModal) closeEditModal();
+    });
+  }
+  document.addEventListener('keydown', function (evt) {
+    if (evt.key === 'Escape' && taskEditModal && !taskEditModal.hidden) closeEditModal();
+  });
+  if (taskEditForm) {
+    taskEditForm.addEventListener('submit', function (evt) {
+      evt.preventDefault();
+      if (!editingRow) return;
+      var name = editCfgName.value.trim();
+      var wallet = editBuyWallet.value.trim();
+      if (!name || !wallet) return;
+      var ov = { name: name, buyWallet: wallet };
+      applyOverride(editingRow, ov);
+      taskOverrides[editingRow.dataset.strategy] = ov;
+      try { localStorage.setItem('b10k_task_overrides', JSON.stringify(taskOverrides)); } catch (e) {}
+      closeEditModal();
     });
   }
   var startAllBtn = document.getElementById('startAllBtn');
