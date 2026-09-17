@@ -221,50 +221,86 @@
   .chart-legend .lg-hint { margin-left: auto; font-style: italic; }
   .chart-x-label { font-family: var(--font-mono); fill: #7c6f8f; }
 
-  /* ---------- calendar popover ---------- */
+  /* ---------- PnL calendar (modal) ---------- */
   .card-head-right { display: flex; align-items: center; gap: 10px; }
-  .cal-wrap { position: relative; }
   .cal-btn.is-active { color: var(--text-primary); border-color: var(--brand-red); background: var(--brand-red-dim); }
-  .cal-pop {
-    position: absolute; top: calc(100% + 8px); right: 0; z-index: 20; width: 258px;
-    background: var(--surface-3); border: 1px solid var(--border-strong); border-radius: 12px;
-    padding: 12px; box-shadow: 0 14px 34px rgba(0,0,0,0.55);
+  .cal-card {
+    width: 100%; max-width: 760px; max-height: calc(100vh - 40px); overflow-y: auto;
+    background: var(--surface-3); border: 1px solid var(--border-strong); border-radius: 16px;
+    padding: 20px 22px; box-shadow: 0 24px 60px rgba(0,0,0,0.55); font-family: var(--font-display);
   }
-  .cal-pop-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-  .cal-month { font-size: 12.5px; font-weight: 700; font-family: var(--font-display); }
+  .cal-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+  .cal-card-title { font-size: 16px; font-weight: 800; }
+  .cal-card-nav { display: flex; align-items: center; gap: 10px; }
+  .cal-month { font-size: 13px; font-weight: 700; min-width: 128px; text-align: center; }
   .cal-nav {
-    width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--border-strong); background: var(--surface-2);
-    color: var(--text-secondary); cursor: pointer; font-size: 13px; line-height: 1; display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--border-strong); background: var(--surface-2);
+    color: var(--text-secondary); cursor: pointer; font-size: 14px; line-height: 1; display: inline-flex; align-items: center; justify-content: center;
   }
   .cal-nav:hover { color: var(--text-primary); border-color: var(--text-secondary); }
-  .cal-weekdays, .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
-  .cal-weekdays { margin-bottom: 4px; }
-  .cal-weekdays span { text-align: center; font-size: 9.5px; color: var(--text-muted); font-family: var(--font-mono); }
+
+  .cal-summary { margin-bottom: 16px; }
+  .cal-total { font-family: var(--font-mono); font-size: 18px; font-weight: 700; }
+  .cal-total.pos { color: var(--good); }
+  .cal-total.neg { color: var(--critical); }
+  .cal-summary-bar { display: flex; height: 6px; border-radius: 4px; overflow: hidden; margin-top: 8px; background: var(--surface-2); }
+  .cal-bar-seg.pos { background: var(--good); }
+  .cal-bar-seg.neg { background: var(--critical); }
+  .cal-summary-labels { display: flex; justify-content: space-between; margin-top: 6px; font-family: var(--font-mono); font-size: 11px; }
+  .cal-summary-labels .pos { color: var(--good); }
+  .cal-summary-labels .neg { color: var(--critical); }
+
+  .cal-weekdays, .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .cal-weekdays { margin-bottom: 6px; }
+  .cal-weekdays span { text-align: center; font-size: 10.5px; color: var(--text-muted); font-family: var(--font-mono); text-transform: uppercase; }
   .cal-day {
-    position: relative; aspect-ratio: 1 / 1; border-radius: 6px; border: 1px solid transparent; background: var(--surface-2);
-    color: var(--text-secondary); font-family: var(--font-mono); font-size: 10.5px; cursor: default;
-    display: flex; align-items: center; justify-content: center;
+    position: relative; min-height: 66px; border-radius: 9px; border: 1px solid var(--border);
+    background: var(--surface-2); padding: 7px 8px; display: flex; flex-direction: column; gap: 6px;
   }
-  .cal-day.is-outside { background: transparent; color: transparent; pointer-events: none; }
-  .cal-day.is-future { opacity: 0.35; }
-  .cal-day.has-data { cursor: pointer; color: var(--text-primary); }
-  .cal-day.has-data:hover { border-color: var(--border-strong); }
-  .cal-day.is-today { border-color: var(--brand-red); }
-  .cal-day.is-selected { background: var(--brand-red-dim); border-color: var(--brand-red); }
-  .cal-day .cal-dot { position: absolute; bottom: 3px; width: 4px; height: 4px; border-radius: 50%; }
-  .cal-day.pos .cal-dot { background: var(--good); }
-  .cal-day.neg .cal-dot { background: var(--critical); }
-  .cal-legend { display: flex; gap: 14px; margin-top: 10px; font-size: 10px; color: var(--text-muted); }
-  .cal-legend .lg-item { display: flex; align-items: center; gap: 5px; }
-  .cal-legend .lg-dot { width: 6px; height: 6px; display: inline-block; }
-  .cal-legend .lg-item.tp .lg-dot { background: var(--good); }
-  .cal-legend .lg-item.sl .lg-dot { background: var(--critical); }
-  .cal-day-info {
-    margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--border); font-size: 11px;
-    color: var(--text-secondary); line-height: 1.5;
+  .cal-day.is-outside { background: transparent; border-color: transparent; }
+  .cal-day.is-future { opacity: 0.4; }
+  .cal-day.pos { background: var(--good-dim); border-color: rgba(38,227,127,0.22); }
+  .cal-day.neg { background: var(--critical-dim); border-color: rgba(255,59,70,0.28); }
+  .cal-day.is-today { border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber) inset; }
+  .cal-day.has-data { cursor: default; }
+  .cal-day-num { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-muted); }
+  .cal-day.pos .cal-day-num { color: var(--good); }
+  .cal-day.neg .cal-day-num { color: var(--critical); }
+  .cal-day-pnl { font-family: var(--font-mono); font-size: 12.5px; font-weight: 700; }
+  .cal-day.pos .cal-day-pnl { color: var(--good); }
+  .cal-day.neg .cal-day-pnl { color: var(--critical); }
+
+  .cal-day-tip {
+    position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%);
+    width: 210px; background: var(--surface-3); border: 1px solid var(--border-strong); border-radius: 10px;
+    padding: 10px; box-shadow: 0 14px 34px rgba(0,0,0,0.6); z-index: 30;
+    opacity: 0; visibility: hidden; transition: opacity 0.12s ease; pointer-events: none;
   }
-  .cal-day-info b { color: var(--text-primary); font-family: var(--font-mono); }
-  .cal-day-info .cal-goto { display: block; margin-top: 4px; color: var(--brand-red); font-weight: 600; cursor: pointer; }
+  .cal-day.has-data:hover .cal-day-tip { opacity: 1; visibility: visible; }
+  .cal-day:nth-child(7n-1) .cal-day-tip, .cal-day:nth-child(7n) .cal-day-tip { left: auto; right: 0; transform: none; }
+  .cal-tip-date { font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; }
+  .cal-tip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .cal-tip-cell {
+    background: var(--surface-2); border-radius: 7px; padding: 6px 8px; display: flex; flex-direction: column; gap: 2px;
+  }
+  .cal-tip-cell b { font-family: var(--font-mono); font-size: 12px; }
+  .cal-tip-cell span { font-size: 9.5px; color: var(--text-muted); }
+  .cal-tip-cell.buys b { color: var(--text-primary); }
+  .cal-tip-cell.sells b { color: var(--text-primary); }
+  .cal-tip-cell.buyvol b { color: var(--brand-red); }
+  .cal-tip-cell.sellvol b { color: var(--good); }
+
+  .cal-streaks { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .cal-streak-chip {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 5px 12px;
+    font-size: 11px; color: var(--text-secondary);
+  }
+  .cal-streak-chip b { color: var(--text-primary); font-family: var(--font-mono); }
+  @media (max-width: 640px) {
+    .cal-day { min-height: 52px; padding: 5px 6px; }
+    .cal-day-pnl { font-size: 11px; }
+    .cal-day-tip { width: 172px; }
+  }
   .tooltip {
     position: absolute; pointer-events: none; opacity: 0; transition: opacity 0.1s ease;
     background: var(--surface-3); border: 1px solid var(--border-strong); border-radius: 8px;
@@ -752,27 +788,9 @@
         <span class="card-title">Courbe de PnL cumulé — session en cours</span>
         <div class="card-head-right">
           <span class="card-hint">13 sorties · SOL</span>
-          <div class="cal-wrap">
-            <button class="icon-btn cal-btn" id="calToggleBtn" type="button" title="Calendrier du mois" aria-label="Ouvrir le calendrier du mois" aria-expanded="false">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            </button>
-            <div class="cal-pop" id="calPop" hidden>
-              <div class="cal-pop-head">
-                <button class="cal-nav" id="calPrev" type="button" aria-label="Mois précédent">‹</button>
-                <span class="cal-month" id="calMonthLabel">Septembre 2026</span>
-                <button class="cal-nav" id="calNext" type="button" aria-label="Mois suivant">›</button>
-              </div>
-              <div class="cal-weekdays">
-                <span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
-              </div>
-              <div class="cal-grid" id="calGrid"></div>
-              <div class="cal-legend">
-                <span class="lg-item tp"><span class="lg-dot" style="clip-path:none;border-radius:50%;"></span>Jour gagnant</span>
-                <span class="lg-item sl"><span class="lg-dot" style="clip-path:none;border-radius:50%;"></span>Jour perdant</span>
-              </div>
-              <div class="cal-day-info" id="calDayInfo">Cliquez un jour pour voir son détail</div>
-            </div>
-          </div>
+          <button class="icon-btn cal-btn" id="calToggleBtn" type="button" title="Calendrier du mois" aria-label="Ouvrir le calendrier du mois" aria-expanded="false">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </button>
         </div>
       </div>
       <div class="chart-wrap" id="chartWrap">
@@ -1389,6 +1407,36 @@
   </form>
 </div>
 
+<div class="modal-overlay" id="calModal" hidden>
+  <div class="cal-card" role="dialog" aria-modal="true" aria-label="Calendrier PnL">
+    <div class="cal-card-head">
+      <span class="cal-card-title">Calendrier PnL</span>
+      <div class="cal-card-nav">
+        <button class="cal-nav" id="calPrev" type="button" aria-label="Mois précédent">‹</button>
+        <span class="cal-month" id="calMonthLabel">Septembre 2026</span>
+        <button class="cal-nav" id="calNext" type="button" aria-label="Mois suivant">›</button>
+      </div>
+      <button class="icon-btn" id="calCloseBtn" type="button" aria-label="Fermer le calendrier">✕</button>
+    </div>
+
+    <div class="cal-summary">
+      <span class="cal-total" id="calTotal">+0.00 SOL</span>
+      <div class="cal-summary-bar"><div class="cal-bar-seg pos" id="calBarPos"></div><div class="cal-bar-seg neg" id="calBarNeg"></div></div>
+      <div class="cal-summary-labels">
+        <span class="pos" id="calPosLabel">0 j · +0.00 SOL</span>
+        <span class="neg" id="calNegLabel">0 j · −0.00 SOL</span>
+      </div>
+    </div>
+
+    <div class="cal-weekdays">
+      <span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+
+    <div class="cal-streaks" id="calStreaks"></div>
+  </div>
+</div>
+
 <script>
 (function () {
   // ---- welcome screen: scroll is locked until the first input, which plays a
@@ -1738,44 +1786,53 @@
     { h: 220 }
   );
 
-  // ---- overview: monthly PnL calendar popover ----
+  // ---- overview: monthly PnL calendar (modal) ----
   (function () {
     var calBtn = document.getElementById('calToggleBtn');
-    var calPop = document.getElementById('calPop');
+    var calModal = document.getElementById('calModal');
+    var calCloseBtn = document.getElementById('calCloseBtn');
     var calGrid = document.getElementById('calGrid');
     var calMonthLabel = document.getElementById('calMonthLabel');
     var calPrev = document.getElementById('calPrev');
     var calNext = document.getElementById('calNext');
-    var calDayInfo = document.getElementById('calDayInfo');
-    if (!calBtn || !calPop || !calGrid) return;
+    var calTotal = document.getElementById('calTotal');
+    var calBarPos = document.getElementById('calBarPos');
+    var calBarNeg = document.getElementById('calBarNeg');
+    var calPosLabel = document.getElementById('calPosLabel');
+    var calNegLabel = document.getElementById('calNegLabel');
+    var calStreaks = document.getElementById('calStreaks');
+    if (!calBtn || !calModal || !calGrid) return;
 
     var monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+    var weekdayShort = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
     var today = new Date(2026, 8, 17); // session date used across the mock data: 2026-09-17
     var viewYear = today.getFullYear(), viewMonth = today.getMonth();
 
-    // mock day-by-day PnL for the demo session, tying back to each strategy's own history
+    // mock day-by-day activity for the demo session, tying back to each strategy's own history
     var dayData = {
-      '2026-09-01': { v: 0.42, n: 3, strat: 'legacy' },
-      '2026-09-02': { v: 0.18, n: 2, strat: 'legacy' },
-      '2026-09-03': { v: -0.25, n: 2, strat: 'legacy' },
-      '2026-09-04': { v: 0.61, n: 4, strat: 'legacy' },
-      '2026-09-05': { v: 0.30, n: 3, strat: 'legacy' },
-      '2026-09-06': { v: 0.15, n: 2, strat: 'legacy' },
-      '2026-09-07': { v: 0.95, n: 4, strat: 'leg1' },
-      '2026-09-08': { v: -0.20, n: 2, strat: 'leg1' },
-      '2026-09-09': { v: 0.55, n: 3, strat: 'leg1' },
-      '2026-09-10': { v: 1.40, n: 5, strat: 'leg1' },
-      '2026-09-11': { v: -0.35, n: 2, strat: 'leg1' },
-      '2026-09-12': { v: 0.28, n: 3, strat: 'leg1' },
-      '2026-09-13': { v: 0.72, n: 4, strat: 'leg1' },
-      '2026-09-14': { v: -0.18, n: 2, strat: 'leg1' },
-      '2026-09-15': { v: 1.05, n: 5, strat: 'leg1' },
-      '2026-09-16': { v: 0.40, n: 3, strat: 'leg1' },
-      '2026-09-17': { v: 2.84, n: 13, strat: 'leg1' }
+      '2026-09-01': { v: 0.42, sells: 3, buys: 7, buyVol: 0.52, strat: 'legacy' },
+      '2026-09-02': { v: 0.18, sells: 2, buys: 5, buyVol: 0.34, strat: 'legacy' },
+      '2026-09-03': { v: -0.25, sells: 2, buys: 6, buyVol: 0.41, strat: 'legacy' },
+      '2026-09-04': { v: 0.61, sells: 4, buys: 8, buyVol: 0.63, strat: 'legacy' },
+      '2026-09-05': { v: 0.30, sells: 3, buys: 7, buyVol: 0.55, strat: 'legacy' },
+      '2026-09-06': { v: 0.15, sells: 2, buys: 4, buyVol: 0.28, strat: 'legacy' },
+      '2026-09-07': { v: 0.95, sells: 4, buys: 9, buyVol: 0.71, strat: 'leg1' },
+      '2026-09-08': { v: -0.20, sells: 2, buys: 6, buyVol: 0.46, strat: 'leg1' },
+      '2026-09-09': { v: 0.55, sells: 3, buys: 7, buyVol: 0.58, strat: 'leg1' },
+      '2026-09-10': { v: 1.40, sells: 5, buys: 11, buyVol: 0.86, strat: 'leg1' },
+      '2026-09-11': { v: -0.35, sells: 2, buys: 5, buyVol: 0.42, strat: 'leg1' },
+      '2026-09-12': { v: 0.28, sells: 3, buys: 7, buyVol: 0.51, strat: 'leg1' },
+      '2026-09-13': { v: 0.72, sells: 4, buys: 8, buyVol: 0.64, strat: 'leg1' },
+      '2026-09-14': { v: -0.18, sells: 2, buys: 5, buyVol: 0.39, strat: 'leg1' },
+      '2026-09-15': { v: 1.05, sells: 5, buys: 10, buyVol: 0.79, strat: 'leg1' },
+      '2026-09-16': { v: 0.40, sells: 3, buys: 7, buyVol: 0.57, strat: 'leg1' },
+      '2026-09-17': { v: 2.84, sells: 13, buys: 18, buyVol: 0.92, strat: 'leg1' }
     };
+    Object.keys(dayData).forEach(function (k) { dayData[k].sellVol = +(dayData[k].buyVol + dayData[k].v).toFixed(3); });
 
     function pad(n) { return n < 10 ? '0' + n : '' + n; }
     function keyFor(y, m, d) { return y + '-' + pad(m + 1) + '-' + pad(d); }
+    function fmtSol(n) { return (n >= 0 ? '+' : '−') + Math.abs(n).toFixed(2) + ' SOL'; }
 
     function render() {
       calMonthLabel.textContent = monthNames[viewMonth] + ' ' + viewYear;
@@ -1785,6 +1842,7 @@
       var daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
       var totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
 
+      var monthKeys = [];
       for (var i = 0; i < totalCells; i++) {
         var dayNum = i - startOffset + 1;
         var cell = document.createElement('div');
@@ -1798,57 +1856,99 @@
         var isFuture = cellDate > today;
         var isToday = cellDate.getTime() === today.getTime();
         var data = dayData[key];
+        if (data) monthKeys.push(key);
         cell.className = 'cal-day' + (isFuture ? ' is-future' : '') + (isToday ? ' is-today' : '') +
           (data ? ' has-data ' + (data.v >= 0 ? 'pos' : 'neg') : '');
-        cell.dataset.key = key;
-        var numSpan = document.createElement('span');
-        numSpan.textContent = dayNum;
-        cell.appendChild(numSpan);
+
+        var numEl = document.createElement('span');
+        numEl.className = 'cal-day-num';
+        numEl.textContent = dayNum;
+        cell.appendChild(numEl);
+
         if (data) {
-          var dot = document.createElement('span');
-          dot.className = 'cal-dot';
-          cell.appendChild(dot);
-          cell.addEventListener('click', function (evt) { selectDay(evt.currentTarget.dataset.key); });
+          var pnlEl = document.createElement('span');
+          pnlEl.className = 'cal-day-pnl';
+          pnlEl.textContent = (data.v >= 0 ? '+' : '−') + Math.abs(data.v).toFixed(3);
+          cell.appendChild(pnlEl);
+
+          var dateLabel = dayNum + ' ' + monthNames[viewMonth].toLowerCase() + ' ' + viewYear;
+          var stratLabel = data.strat === 'legacy' ? 'Copy_trade (legacy)' : 'Leg 1 & 2';
+          var tip = document.createElement('div');
+          tip.className = 'cal-day-tip';
+          tip.innerHTML =
+            '<div class="cal-tip-date">' + dateLabel + ' · ' + stratLabel + '</div>' +
+            '<div class="cal-tip-grid">' +
+              '<div class="cal-tip-cell buys"><b>' + data.buys + '</b><span>Achats</span></div>' +
+              '<div class="cal-tip-cell sells"><b>' + data.sells + '</b><span>Ventes</span></div>' +
+              '<div class="cal-tip-cell buyvol"><b>' + data.buyVol.toFixed(2) + ' SOL</b><span>Vol. achat</span></div>' +
+              '<div class="cal-tip-cell sellvol"><b>' + data.sellVol.toFixed(2) + ' SOL</b><span>Vol. vente</span></div>' +
+            '</div>';
+          cell.appendChild(tip);
+          cell.dataset.strat = data.strat;
+          cell.addEventListener('click', function (evt) {
+            activateTab('strategy');
+            openStrategy(evt.currentTarget.dataset.strat);
+            closeCal();
+          });
         }
         calGrid.appendChild(cell);
       }
+
+      renderSummary(monthKeys);
+      renderStreaks(monthKeys);
     }
 
-    function selectDay(key) {
-      calGrid.querySelectorAll('.cal-day').forEach(function (c) { c.classList.toggle('is-selected', c.dataset.key === key); });
-      var data = dayData[key];
-      if (!data) { calDayInfo.textContent = 'Aucune activité ce jour'; return; }
-      var d = new Date(key + 'T00:00:00');
-      var dateLabel = d.getDate() + ' ' + monthNames[d.getMonth()].toLowerCase() + ' ' + d.getFullYear();
-      var stratLabel = data.strat === 'legacy' ? 'Copy_trade (legacy)' : 'Leg 1 & 2';
-      calDayInfo.innerHTML =
-        dateLabel + ' — <b>' + (data.v >= 0 ? '+' : '') + data.v.toFixed(2) + ' SOL</b> · ' + data.n + ' sorties · ' + stratLabel +
-        '<span class="cal-goto" data-strat="' + data.strat + '">Voir la stratégie →</span>';
-      var gotoLink = calDayInfo.querySelector('.cal-goto');
-      if (gotoLink) {
-        gotoLink.addEventListener('click', function () {
-          activateTab('strategy');
-          openStrategy(data.strat);
-          closeCal();
-        });
+    function renderSummary(monthKeys) {
+      var posDays = [], negDays = [];
+      monthKeys.forEach(function (k) { (dayData[k].v >= 0 ? posDays : negDays).push(dayData[k].v); });
+      var posSum = posDays.reduce(function (a, b) { return a + b; }, 0);
+      var negSum = negDays.reduce(function (a, b) { return a + b; }, 0);
+      var net = posSum + negSum;
+      calTotal.textContent = fmtSol(net);
+      calTotal.className = 'cal-total ' + (net >= 0 ? 'pos' : 'neg');
+      var total = posSum + Math.abs(negSum);
+      var posPct = total > 0 ? (posSum / total) * 100 : 0;
+      calBarPos.style.width = posPct + '%';
+      calBarNeg.style.width = (100 - posPct) + '%';
+      calPosLabel.textContent = posDays.length + ' j · +' + posSum.toFixed(2) + ' SOL';
+      calNegLabel.textContent = negDays.length + ' j · −' + Math.abs(negSum).toFixed(2) + ' SOL';
+    }
+
+    function renderStreaks(monthKeys) {
+      var signs = monthKeys.map(function (k) { return dayData[k].v >= 0; });
+      var current = 0;
+      if (signs.length) {
+        var lastSign = signs[signs.length - 1];
+        for (var i = signs.length - 1; i >= 0 && signs[i] === lastSign; i--) current++;
       }
+      var bestPos = 0, run = 0;
+      signs.forEach(function (s) { run = s ? run + 1 : 0; if (run > bestPos) bestPos = run; });
+      var currentLabel = (signs.length && signs[signs.length - 1]) ? 'positive' : 'négative';
+      calStreaks.innerHTML =
+        '<span class="cal-streak-chip">Série en cours : <b>' + current + ' j ' + currentLabel + '</b></span>' +
+        '<span class="cal-streak-chip">Meilleure série du mois : <b>' + bestPos + ' j</b></span>' +
+        '<span class="cal-streak-chip">Meilleure série (historique) : <b>5 j</b></span>' +
+        '<span class="cal-streak-chip">Jours actifs : <b>' + monthKeys.length + '</b></span>';
     }
 
-    function openCal() { calPop.hidden = false; calBtn.classList.add('is-active'); calBtn.setAttribute('aria-expanded', 'true'); }
-    function closeCal() { calPop.hidden = true; calBtn.classList.remove('is-active'); calBtn.setAttribute('aria-expanded', 'false'); }
+    function openCal() {
+      render();
+      calModal.hidden = false;
+      calBtn.classList.add('is-active');
+      calBtn.setAttribute('aria-expanded', 'true');
+    }
+    function closeCal() {
+      calModal.hidden = true;
+      calBtn.classList.remove('is-active');
+      calBtn.setAttribute('aria-expanded', 'false');
+    }
 
-    calBtn.addEventListener('click', function (evt) {
-      evt.stopPropagation();
-      if (calPop.hidden) { render(); openCal(); } else { closeCal(); }
-    });
+    calBtn.addEventListener('click', openCal);
+    calCloseBtn.addEventListener('click', closeCal);
+    calModal.addEventListener('click', function (evt) { if (evt.target === calModal) closeCal(); });
+    document.addEventListener('keydown', function (evt) { if (evt.key === 'Escape' && !calModal.hidden) closeCal(); });
     calPrev.addEventListener('click', function () { viewMonth--; if (viewMonth < 0) { viewMonth = 11; viewYear--; } render(); });
     calNext.addEventListener('click', function () { viewMonth++; if (viewMonth > 11) { viewMonth = 0; viewYear++; } render(); });
-    calPop.addEventListener('click', function (evt) { evt.stopPropagation(); });
-    document.addEventListener('click', function () { if (!calPop.hidden) closeCal(); });
-    document.addEventListener('keydown', function (evt) { if (evt.key === 'Escape' && !calPop.hidden) closeCal(); });
-
-    render();
-    selectDay(keyFor(today.getFullYear(), today.getMonth(), today.getDate()));
   })();
 
   // ---- strategy tiles: open/close detail view ----
