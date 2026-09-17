@@ -220,6 +220,51 @@
   .chart-legend .lg-item.sl .lg-dot { background: var(--critical); clip-path: polygon(0% 0%, 100% 0%, 50% 100%); border-radius: 0; }
   .chart-legend .lg-hint { margin-left: auto; font-style: italic; }
   .chart-x-label { font-family: var(--font-mono); fill: #7c6f8f; }
+
+  /* ---------- calendar popover ---------- */
+  .card-head-right { display: flex; align-items: center; gap: 10px; }
+  .cal-wrap { position: relative; }
+  .cal-btn.is-active { color: var(--text-primary); border-color: var(--brand-red); background: var(--brand-red-dim); }
+  .cal-pop {
+    position: absolute; top: calc(100% + 8px); right: 0; z-index: 20; width: 258px;
+    background: var(--surface-3); border: 1px solid var(--border-strong); border-radius: 12px;
+    padding: 12px; box-shadow: 0 14px 34px rgba(0,0,0,0.55);
+  }
+  .cal-pop-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .cal-month { font-size: 12.5px; font-weight: 700; font-family: var(--font-display); }
+  .cal-nav {
+    width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--border-strong); background: var(--surface-2);
+    color: var(--text-secondary); cursor: pointer; font-size: 13px; line-height: 1; display: inline-flex; align-items: center; justify-content: center;
+  }
+  .cal-nav:hover { color: var(--text-primary); border-color: var(--text-secondary); }
+  .cal-weekdays, .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .cal-weekdays { margin-bottom: 4px; }
+  .cal-weekdays span { text-align: center; font-size: 9.5px; color: var(--text-muted); font-family: var(--font-mono); }
+  .cal-day {
+    position: relative; aspect-ratio: 1 / 1; border-radius: 6px; border: 1px solid transparent; background: var(--surface-2);
+    color: var(--text-secondary); font-family: var(--font-mono); font-size: 10.5px; cursor: default;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cal-day.is-outside { background: transparent; color: transparent; pointer-events: none; }
+  .cal-day.is-future { opacity: 0.35; }
+  .cal-day.has-data { cursor: pointer; color: var(--text-primary); }
+  .cal-day.has-data:hover { border-color: var(--border-strong); }
+  .cal-day.is-today { border-color: var(--brand-red); }
+  .cal-day.is-selected { background: var(--brand-red-dim); border-color: var(--brand-red); }
+  .cal-day .cal-dot { position: absolute; bottom: 3px; width: 4px; height: 4px; border-radius: 50%; }
+  .cal-day.pos .cal-dot { background: var(--good); }
+  .cal-day.neg .cal-dot { background: var(--critical); }
+  .cal-legend { display: flex; gap: 14px; margin-top: 10px; font-size: 10px; color: var(--text-muted); }
+  .cal-legend .lg-item { display: flex; align-items: center; gap: 5px; }
+  .cal-legend .lg-dot { width: 6px; height: 6px; display: inline-block; }
+  .cal-legend .lg-item.tp .lg-dot { background: var(--good); }
+  .cal-legend .lg-item.sl .lg-dot { background: var(--critical); }
+  .cal-day-info {
+    margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--border); font-size: 11px;
+    color: var(--text-secondary); line-height: 1.5;
+  }
+  .cal-day-info b { color: var(--text-primary); font-family: var(--font-mono); }
+  .cal-day-info .cal-goto { display: block; margin-top: 4px; color: var(--brand-red); font-weight: 600; cursor: pointer; }
   .tooltip {
     position: absolute; pointer-events: none; opacity: 0; transition: opacity 0.1s ease;
     background: var(--surface-3); border: 1px solid var(--border-strong); border-radius: 8px;
@@ -705,7 +750,30 @@
     <div class="card">
       <div class="card-head">
         <span class="card-title">Courbe de PnL cumulé — session en cours</span>
-        <span class="card-hint">13 sorties · SOL</span>
+        <div class="card-head-right">
+          <span class="card-hint">13 sorties · SOL</span>
+          <div class="cal-wrap">
+            <button class="icon-btn cal-btn" id="calToggleBtn" type="button" title="Calendrier du mois" aria-label="Ouvrir le calendrier du mois" aria-expanded="false">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </button>
+            <div class="cal-pop" id="calPop" hidden>
+              <div class="cal-pop-head">
+                <button class="cal-nav" id="calPrev" type="button" aria-label="Mois précédent">‹</button>
+                <span class="cal-month" id="calMonthLabel">Septembre 2026</span>
+                <button class="cal-nav" id="calNext" type="button" aria-label="Mois suivant">›</button>
+              </div>
+              <div class="cal-weekdays">
+                <span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span>
+              </div>
+              <div class="cal-grid" id="calGrid"></div>
+              <div class="cal-legend">
+                <span class="lg-item tp"><span class="lg-dot" style="clip-path:none;border-radius:50%;"></span>Jour gagnant</span>
+                <span class="lg-item sl"><span class="lg-dot" style="clip-path:none;border-radius:50%;"></span>Jour perdant</span>
+              </div>
+              <div class="cal-day-info" id="calDayInfo">Cliquez un jour pour voir son détail</div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="chart-wrap" id="chartWrap">
         <svg class="chart-svg" id="equitySvg" viewBox="0 0 760 260" preserveAspectRatio="xMidYMid meet">
@@ -1669,6 +1737,119 @@
     ],
     { h: 220 }
   );
+
+  // ---- overview: monthly PnL calendar popover ----
+  (function () {
+    var calBtn = document.getElementById('calToggleBtn');
+    var calPop = document.getElementById('calPop');
+    var calGrid = document.getElementById('calGrid');
+    var calMonthLabel = document.getElementById('calMonthLabel');
+    var calPrev = document.getElementById('calPrev');
+    var calNext = document.getElementById('calNext');
+    var calDayInfo = document.getElementById('calDayInfo');
+    if (!calBtn || !calPop || !calGrid) return;
+
+    var monthNames = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+    var today = new Date(2026, 8, 17); // session date used across the mock data: 2026-09-17
+    var viewYear = today.getFullYear(), viewMonth = today.getMonth();
+
+    // mock day-by-day PnL for the demo session, tying back to each strategy's own history
+    var dayData = {
+      '2026-09-01': { v: 0.42, n: 3, strat: 'legacy' },
+      '2026-09-02': { v: 0.18, n: 2, strat: 'legacy' },
+      '2026-09-03': { v: -0.25, n: 2, strat: 'legacy' },
+      '2026-09-04': { v: 0.61, n: 4, strat: 'legacy' },
+      '2026-09-05': { v: 0.30, n: 3, strat: 'legacy' },
+      '2026-09-06': { v: 0.15, n: 2, strat: 'legacy' },
+      '2026-09-07': { v: 0.95, n: 4, strat: 'leg1' },
+      '2026-09-08': { v: -0.20, n: 2, strat: 'leg1' },
+      '2026-09-09': { v: 0.55, n: 3, strat: 'leg1' },
+      '2026-09-10': { v: 1.40, n: 5, strat: 'leg1' },
+      '2026-09-11': { v: -0.35, n: 2, strat: 'leg1' },
+      '2026-09-12': { v: 0.28, n: 3, strat: 'leg1' },
+      '2026-09-13': { v: 0.72, n: 4, strat: 'leg1' },
+      '2026-09-14': { v: -0.18, n: 2, strat: 'leg1' },
+      '2026-09-15': { v: 1.05, n: 5, strat: 'leg1' },
+      '2026-09-16': { v: 0.40, n: 3, strat: 'leg1' },
+      '2026-09-17': { v: 2.84, n: 13, strat: 'leg1' }
+    };
+
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+    function keyFor(y, m, d) { return y + '-' + pad(m + 1) + '-' + pad(d); }
+
+    function render() {
+      calMonthLabel.textContent = monthNames[viewMonth] + ' ' + viewYear;
+      calGrid.innerHTML = '';
+      var first = new Date(viewYear, viewMonth, 1);
+      var startOffset = (first.getDay() + 6) % 7; // Monday-first grid
+      var daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+      var totalCells = Math.ceil((startOffset + daysInMonth) / 7) * 7;
+
+      for (var i = 0; i < totalCells; i++) {
+        var dayNum = i - startOffset + 1;
+        var cell = document.createElement('div');
+        if (dayNum < 1 || dayNum > daysInMonth) {
+          cell.className = 'cal-day is-outside';
+          calGrid.appendChild(cell);
+          continue;
+        }
+        var key = keyFor(viewYear, viewMonth, dayNum);
+        var cellDate = new Date(viewYear, viewMonth, dayNum);
+        var isFuture = cellDate > today;
+        var isToday = cellDate.getTime() === today.getTime();
+        var data = dayData[key];
+        cell.className = 'cal-day' + (isFuture ? ' is-future' : '') + (isToday ? ' is-today' : '') +
+          (data ? ' has-data ' + (data.v >= 0 ? 'pos' : 'neg') : '');
+        cell.dataset.key = key;
+        var numSpan = document.createElement('span');
+        numSpan.textContent = dayNum;
+        cell.appendChild(numSpan);
+        if (data) {
+          var dot = document.createElement('span');
+          dot.className = 'cal-dot';
+          cell.appendChild(dot);
+          cell.addEventListener('click', function (evt) { selectDay(evt.currentTarget.dataset.key); });
+        }
+        calGrid.appendChild(cell);
+      }
+    }
+
+    function selectDay(key) {
+      calGrid.querySelectorAll('.cal-day').forEach(function (c) { c.classList.toggle('is-selected', c.dataset.key === key); });
+      var data = dayData[key];
+      if (!data) { calDayInfo.textContent = 'Aucune activité ce jour'; return; }
+      var d = new Date(key + 'T00:00:00');
+      var dateLabel = d.getDate() + ' ' + monthNames[d.getMonth()].toLowerCase() + ' ' + d.getFullYear();
+      var stratLabel = data.strat === 'legacy' ? 'Copy_trade (legacy)' : 'Leg 1 & 2';
+      calDayInfo.innerHTML =
+        dateLabel + ' — <b>' + (data.v >= 0 ? '+' : '') + data.v.toFixed(2) + ' SOL</b> · ' + data.n + ' sorties · ' + stratLabel +
+        '<span class="cal-goto" data-strat="' + data.strat + '">Voir la stratégie →</span>';
+      var gotoLink = calDayInfo.querySelector('.cal-goto');
+      if (gotoLink) {
+        gotoLink.addEventListener('click', function () {
+          activateTab('strategy');
+          openStrategy(data.strat);
+          closeCal();
+        });
+      }
+    }
+
+    function openCal() { calPop.hidden = false; calBtn.classList.add('is-active'); calBtn.setAttribute('aria-expanded', 'true'); }
+    function closeCal() { calPop.hidden = true; calBtn.classList.remove('is-active'); calBtn.setAttribute('aria-expanded', 'false'); }
+
+    calBtn.addEventListener('click', function (evt) {
+      evt.stopPropagation();
+      if (calPop.hidden) { render(); openCal(); } else { closeCal(); }
+    });
+    calPrev.addEventListener('click', function () { viewMonth--; if (viewMonth < 0) { viewMonth = 11; viewYear--; } render(); });
+    calNext.addEventListener('click', function () { viewMonth++; if (viewMonth > 11) { viewMonth = 0; viewYear++; } render(); });
+    calPop.addEventListener('click', function (evt) { evt.stopPropagation(); });
+    document.addEventListener('click', function () { if (!calPop.hidden) closeCal(); });
+    document.addEventListener('keydown', function (evt) { if (evt.key === 'Escape' && !calPop.hidden) closeCal(); });
+
+    render();
+    selectDay(keyFor(today.getFullYear(), today.getMonth(), today.getDate()));
+  })();
 
   // ---- strategy tiles: open/close detail view ----
   var stratGrid = document.getElementById('stratGrid');
