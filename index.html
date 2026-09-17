@@ -34,6 +34,12 @@
 
   body { background: var(--bg-plane); color: var(--text-primary); font-family: var(--font-display); -webkit-font-smoothing: antialiased; }
 
+  html { scrollbar-width: thin; scrollbar-color: var(--border-strong) var(--bg-plane); }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--bg-plane); }
+  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 999px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--brand-red); }
+
   .bg-layer {
     position: fixed; inset: 0; z-index: -1;
     background-image:
@@ -511,9 +517,11 @@
       radial-gradient(ellipse 80% 55% at 50% 38%, rgba(255,36,56,0.20), transparent 65%),
       rgba(5,2,3,0.62);
     -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
-    transition: opacity 0.25s ease;
+    transition: opacity 0.7s ease, filter 0.7s ease, transform 0.7s ease;
   }
-  .welcome-screen.is-hidden { pointer-events: none; visibility: hidden; }
+  .welcome-screen.is-dissolved {
+    opacity: 0; filter: blur(14px); transform: scale(1.04); pointer-events: none;
+  }
   .welcome-inner { display: flex; flex-direction: column; align-items: center; gap: 16px; }
   .welcome-mark {
     width: 60px; height: 60px; border-radius: 16px; flex: none;
@@ -539,7 +547,7 @@
     0%, 100% { transform: translateY(0); opacity: 0.55; }
     50% { transform: translateY(6px); opacity: 1; }
   }
-  .welcome-spacer { height: 62vh; }
+  .welcome-spacer { height: 40vh; }
   @media (prefers-reduced-motion: reduce) {
     .welcome-hint { animation: none; }
   }
@@ -1141,23 +1149,25 @@
 
 <script>
 (function () {
-  // ---- welcome screen: dissolves as it scrolls out of view ----
-  // Uses IntersectionObserver (not scroll events): this artifact renders inside an
-  // auto-sizing iframe, so the page that actually scrolls is the host page, not our
-  // own document — a 'scroll' listener here never fires. IntersectionObserver tracks
-  // real screen visibility across that iframe boundary, so it keeps working either way.
+  // ---- welcome screen: one small scroll triggers a full dissolve animation ----
   var welcomeEl = document.getElementById('welcomeScreen');
-  var welcomeSpacer = document.querySelector('.welcome-spacer');
-  if (welcomeEl && welcomeSpacer && 'IntersectionObserver' in window) {
-    var steps = [];
-    for (var s = 0; s <= 100; s++) steps.push(s / 100);
-    var welcomeObserver = new IntersectionObserver(function (entries) {
-      var entry = entries[entries.length - 1];
-      var ratio = entry.intersectionRatio;
-      welcomeEl.style.opacity = String(ratio);
-      welcomeEl.classList.toggle('is-hidden', ratio <= 0.01);
-    }, { threshold: steps });
-    welcomeObserver.observe(welcomeSpacer);
+  if (welcomeEl) {
+    var welcomeDissolved = false;
+    function dissolveWelcome() {
+      if (welcomeDissolved) return;
+      welcomeDissolved = true;
+      welcomeEl.classList.add('is-dissolved');
+    }
+    window.addEventListener('scroll', function () {
+      if (window.scrollY > 16) dissolveWelcome();
+    }, { passive: true });
+    window.addEventListener('wheel', function (evt) {
+      if (evt.deltaY > 0) dissolveWelcome();
+    }, { passive: true });
+    window.addEventListener('touchmove', dissolveWelcome, { passive: true });
+    window.addEventListener('keydown', function (evt) {
+      if (['ArrowDown', 'PageDown', ' '].indexOf(evt.key) !== -1) dissolveWelcome();
+    });
   }
 
   try {
