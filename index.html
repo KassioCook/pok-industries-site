@@ -446,8 +446,9 @@
   .task-card-wallets { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .task-card-wallets .arrow { color: var(--text-muted); font-family: var(--font-mono); }
 
-  .cfg-name { display: flex; flex-direction: column; gap: 2px; }
+  .cfg-name { display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
   .cfg-name b { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+  .cfg-name:hover b { color: var(--brand-red); }
   .cfg-name small { font-size: 10.5px; color: var(--text-muted); font-family: var(--font-mono); }
 
   .wallet-cell { display: flex; align-items: center; gap: 8px; }
@@ -1652,6 +1653,12 @@
       var editBtn = evt.target.closest('[data-edit]');
       if (editBtn) {
         openEditModal(editBtn.closest('.task-card').dataset.strategy);
+        return;
+      }
+      var nameBtn = evt.target.closest('.cfg-name');
+      if (nameBtn) {
+        activateTab('strategy');
+        openStrategy(nameBtn.closest('.task-card').dataset.strategy);
         return;
       }
       // two explicit, distinct buttons — clicking one sets it active and disarms its sibling
