@@ -650,6 +650,44 @@
   .import-log-line.is-done .lg-mark { color: var(--good); }
   .import-log-line.is-final { color: var(--good); font-weight: 600; }
 
+  /* ---------- block note (custom cards) ---------- */
+  .note-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .note-card {
+    position: relative; display: flex; flex-direction: column; text-align: left; cursor: pointer; width: 100%; padding: 0;
+    background: var(--surface-1); -webkit-backdrop-filter: blur(18px) saturate(130%); backdrop-filter: blur(18px) saturate(130%);
+    border: 1px solid var(--border); border-radius: 16px; overflow: hidden; font-family: var(--font-display);
+    color: var(--text-primary); transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .note-card:hover { border-color: var(--border-strong); transform: translateY(-2px); box-shadow: 0 10px 26px rgba(0,0,0,0.35); }
+  .note-card:focus-visible { outline: 2px solid var(--brand-red); outline-offset: 2px; }
+  .note-card-cover { aspect-ratio: 16 / 10; background: var(--surface-2); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .note-card-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .note-card-cover .note-card-placeholder { color: var(--text-muted); opacity: 0.55; }
+  .note-card-body { padding: 13px 16px 15px; display: flex; flex-direction: column; gap: 4px; }
+  .note-card-name { font-weight: 700; font-size: 14.5px; overflow-wrap: anywhere; }
+  .note-card-hint { font-size: 11px; color: var(--text-muted); }
+  .note-empty {
+    display: flex; flex-direction: column; gap: 6px; align-items: center; text-align: center; padding: 44px 20px;
+    border: 1px dashed var(--border-strong); border-radius: 16px; color: var(--text-muted); font-size: 12.5px; line-height: 1.55;
+    background: var(--surface-1);
+  }
+  .note-empty b { color: var(--text-secondary); font-size: 14px; }
+  .note-empty[hidden] { display: none; }
+  .note-detail-actions { display: flex; gap: 8px; margin-left: auto; }
+  .note-detail-cover { margin: -4px -4px 16px; border-radius: 12px; overflow: hidden; background: var(--surface-2); }
+  .note-detail-cover[hidden] { display: none; }
+  .note-detail-cover img { width: 100%; max-height: 420px; object-fit: cover; display: block; }
+  .note-detail-name { margin: 0 0 10px; font-size: 19px; font-weight: 700; overflow-wrap: anywhere; }
+  .note-detail-desc { margin: 0; font-size: 13.5px; line-height: 1.65; color: var(--text-secondary); white-space: pre-wrap; overflow-wrap: anywhere; }
+  .note-edit-card { max-width: 480px; max-height: calc(100vh - 40px); overflow-y: auto; }
+  .note-img-preview { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+  .note-img-preview[hidden] { display: none; }
+  .note-img-preview img { width: 96px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-strong); }
+  .note-edit-error { font-size: 11.5px; color: var(--critical); }
+  .note-edit-error[hidden] { display: none; }
+  @media (max-width: 900px) { .note-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 560px) { .note-grid { grid-template-columns: 1fr; } }
+
   /* ---------- edit config modal ---------- */
   .modal-overlay {
     position: fixed; inset: 0; z-index: 90; display: flex; align-items: center; justify-content: center;
@@ -786,6 +824,7 @@
     <button class="tab" role="tab" data-panel="import" type="button">Importation<span class="new-badge" id="importTabBadge">+3</span></button>
     <button class="tab" role="tab" data-panel="activity" type="button">Activité <span class="tab-count">6</span></button>
     <button class="tab" role="tab" data-panel="tasks" type="button">Tâches <span class="tab-count" id="tasksTabCount">3</span></button>
+    <button class="tab" role="tab" data-panel="notes" type="button">Block note <span class="tab-count" id="notesTabCount">0</span></button>
   </div>
 
   <!-- ============ OVERVIEW ============ -->
@@ -1407,7 +1446,63 @@
     </div>
   </section>
 
+  <!-- ============ BLOCK NOTE ============ -->
+  <section class="panel" data-panel="notes">
+    <div id="notesListView">
+      <div class="task-toolbar">
+        <button class="toolbar-btn primary" id="noteNewBtn" type="button">＋ Nouvelle fiche</button>
+        <span class="card-hint" id="notesHint">tes propres fiches — nom, image et description</span>
+      </div>
+      <div class="note-grid" id="notesGrid"></div>
+      <div class="note-empty" id="notesEmpty">
+        <b>Aucune fiche pour l'instant</b>
+        <span>Clique sur « Nouvelle fiche » pour créer ta première carte : un nom, une image (facultative) et une description.</span>
+      </div>
+    </div>
 
+    <div id="noteDetailView" hidden>
+      <div class="strat-detail-head">
+        <button class="close-btn" id="noteBackBtn" type="button">✕ Retour</button>
+        <div class="note-detail-actions">
+          <button class="toolbar-btn" id="noteEditBtn" type="button">✎ Modifier</button>
+          <button class="toolbar-btn stop" id="noteDeleteBtn" type="button">Supprimer</button>
+        </div>
+      </div>
+      <div class="card" style="margin-top:0;">
+        <div class="note-detail-cover" id="noteDetailCover" hidden><img id="noteDetailImg" alt=""></div>
+        <h3 class="note-detail-name" id="noteDetailName"></h3>
+        <p class="note-detail-desc" id="noteDetailDesc"></p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="modal-overlay" id="noteEditModal" hidden>
+  <form class="modal-card note-edit-card" id="noteEditForm">
+    <h3 class="modal-title" id="noteEditTitle">Nouvelle fiche</h3>
+    <div class="modal-field">
+      <label for="noteNameInput">Nom</label>
+      <input type="text" id="noteNameInput" required maxlength="80" placeholder="Ex. Idée de stratégie, wallet à suivre…">
+    </div>
+    <div class="modal-field">
+      <label for="noteDescInput">Description</label>
+      <textarea id="noteDescInput" placeholder="Écris ce que tu veux : idées, règles, liens, rappels…" style="min-height:120px;"></textarea>
+    </div>
+    <div class="modal-field">
+      <label for="noteImgInput">Image (facultative)</label>
+      <input type="file" id="noteImgInput" accept="image/*">
+      <div class="note-img-preview" id="noteImgPreview" hidden>
+        <img id="noteImgPreviewImg" alt="Aperçu de l'image">
+        <button type="button" class="toolbar-btn" id="noteImgRemoveBtn">Retirer l'image</button>
+      </div>
+    </div>
+    <span class="note-edit-error" id="noteEditError" hidden></span>
+    <div class="modal-actions">
+      <button type="button" class="toolbar-btn" id="noteCancelBtn">Annuler</button>
+      <button type="submit" class="toolbar-btn primary">Enregistrer</button>
+    </div>
+  </form>
 </div>
 
 <div class="modal-overlay" id="taskEditModal" hidden>
@@ -2526,6 +2621,223 @@
         if (gotoListBtn) { activateTab('tasks'); }
       });
     }
+  })();
+
+  // ---- block note: user-made cards (name + optional image + description), kept in localStorage ----
+  (function () {
+    var STORAGE_KEY = 'b10k_notes';
+    var listView = document.getElementById('notesListView');
+    var detailView = document.getElementById('noteDetailView');
+    var grid = document.getElementById('notesGrid');
+    var emptyEl = document.getElementById('notesEmpty');
+    var tabCount = document.getElementById('notesTabCount');
+    var newBtn = document.getElementById('noteNewBtn');
+    var backBtn = document.getElementById('noteBackBtn');
+    var editBtn = document.getElementById('noteEditBtn');
+    var deleteBtn = document.getElementById('noteDeleteBtn');
+    var detailCover = document.getElementById('noteDetailCover');
+    var detailImg = document.getElementById('noteDetailImg');
+    var detailName = document.getElementById('noteDetailName');
+    var detailDesc = document.getElementById('noteDetailDesc');
+    var modal = document.getElementById('noteEditModal');
+    var form = document.getElementById('noteEditForm');
+    var modalTitle = document.getElementById('noteEditTitle');
+    var nameInput = document.getElementById('noteNameInput');
+    var descInput = document.getElementById('noteDescInput');
+    var imgInput = document.getElementById('noteImgInput');
+    var imgPreview = document.getElementById('noteImgPreview');
+    var imgPreviewImg = document.getElementById('noteImgPreviewImg');
+    var imgRemoveBtn = document.getElementById('noteImgRemoveBtn');
+    var errorEl = document.getElementById('noteEditError');
+    var cancelBtn = document.getElementById('noteCancelBtn');
+    if (!grid || !modal || !form) return;
+
+    var notes = [];
+    try {
+      var parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      if (Array.isArray(parsed)) notes = parsed;
+    } catch (e) {}
+
+    var currentId = null;   // note open in the detail view
+    var editingId = null;   // note being edited (null = creating a new one)
+    var pendingImg = '';    // image data URL currently attached in the editor
+    var deleteTimer = null;
+
+    function persist() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); return true; }
+      catch (e) { return false; }
+    }
+    function findNote(id) { return notes.filter(function (n) { return n.id === id; })[0]; }
+
+    function showError(msg) {
+      errorEl.textContent = msg || '';
+      errorEl.hidden = !msg;
+    }
+
+    var placeholderSvg =
+      '<svg class="note-card-placeholder" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">' +
+      '<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="9" r="1.6"/><path d="M21 16l-5-5-8 8"/></svg>';
+
+    function renderGrid() {
+      grid.innerHTML = '';
+      notes.forEach(function (n) {
+        var card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'note-card';
+        card.dataset.id = n.id;
+
+        var cover = document.createElement('div');
+        cover.className = 'note-card-cover';
+        if (n.img) {
+          var img = document.createElement('img');
+          img.src = n.img;
+          img.alt = '';
+          cover.appendChild(img);
+        } else {
+          cover.innerHTML = placeholderSvg;
+        }
+
+        var body = document.createElement('div');
+        body.className = 'note-card-body';
+        var nameEl = document.createElement('span');
+        nameEl.className = 'note-card-name';
+        nameEl.textContent = n.name;
+        var hint = document.createElement('span');
+        hint.className = 'note-card-hint';
+        hint.textContent = 'Cliquer pour la description →';
+        body.appendChild(nameEl);
+        body.appendChild(hint);
+
+        card.appendChild(cover);
+        card.appendChild(body);
+        card.addEventListener('click', function () { openDetail(n.id); });
+        grid.appendChild(card);
+      });
+      emptyEl.hidden = notes.length > 0;
+      if (tabCount) tabCount.textContent = String(notes.length);
+    }
+
+    function resetDeleteButton() {
+      clearTimeout(deleteTimer);
+      deleteBtn.textContent = 'Supprimer';
+      deleteBtn.dataset.armed = '';
+    }
+
+    function renderDetail() {
+      var n = findNote(currentId);
+      if (!n) { closeDetail(); return; }
+      detailName.textContent = n.name;
+      detailDesc.textContent = n.desc || 'Pas de description.';
+      if (n.img) { detailImg.src = n.img; detailCover.hidden = false; }
+      else { detailImg.removeAttribute('src'); detailCover.hidden = true; }
+    }
+
+    function openDetail(id) {
+      currentId = id;
+      resetDeleteButton();
+      renderDetail();
+      listView.hidden = true;
+      detailView.hidden = false;
+    }
+    function closeDetail() {
+      currentId = null;
+      resetDeleteButton();
+      detailView.hidden = true;
+      listView.hidden = false;
+    }
+
+    function setPendingImg(dataUrl) {
+      pendingImg = dataUrl || '';
+      imgPreview.hidden = !pendingImg;
+      if (pendingImg) imgPreviewImg.src = pendingImg; else imgPreviewImg.removeAttribute('src');
+    }
+
+    function openEditor(id) {
+      editingId = id || null;
+      var n = editingId ? findNote(editingId) : null;
+      modalTitle.textContent = n ? 'Modifier la fiche' : 'Nouvelle fiche';
+      nameInput.value = n ? n.name : '';
+      descInput.value = n ? n.desc : '';
+      imgInput.value = '';
+      setPendingImg(n ? n.img : '');
+      showError('');
+      modal.hidden = false;
+      nameInput.focus();
+    }
+    function closeEditor() { modal.hidden = true; }
+
+    // downscale + re-encode so a few photos don't blow the ~5MB localStorage quota
+    function processImageFile(file) {
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onerror = function () { showError('Impossible de lire ce fichier.'); };
+      reader.onload = function () {
+        var img = new Image();
+        img.onerror = function () { showError('Ce fichier n’est pas une image lisible.'); };
+        img.onload = function () {
+          var MAX = 900;
+          var scale = Math.min(1, MAX / Math.max(img.width, img.height));
+          var canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(img.width * scale));
+          canvas.height = Math.max(1, Math.round(img.height * scale));
+          var ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#0b0614';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          showError('');
+          setPendingImg(canvas.toDataURL('image/jpeg', 0.82));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    newBtn.addEventListener('click', function () { openEditor(null); });
+    cancelBtn.addEventListener('click', closeEditor);
+    modal.addEventListener('click', function (evt) { if (evt.target === modal) closeEditor(); });
+    document.addEventListener('keydown', function (evt) { if (evt.key === 'Escape' && !modal.hidden) closeEditor(); });
+    imgInput.addEventListener('change', function () { processImageFile(imgInput.files && imgInput.files[0]); });
+    imgRemoveBtn.addEventListener('click', function () { imgInput.value = ''; setPendingImg(''); });
+
+    form.addEventListener('submit', function (evt) {
+      evt.preventDefault();
+      var name = nameInput.value.trim();
+      if (!name) { showError('Donne un nom à la fiche.'); return; }
+      var snapshot = JSON.stringify(notes);
+      var target = editingId ? findNote(editingId) : null;
+      if (target) {
+        target.name = name; target.desc = descInput.value; target.img = pendingImg;
+      } else {
+        target = { id: 'n_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: name, desc: descInput.value, img: pendingImg };
+        notes.push(target);
+      }
+      if (!persist()) {
+        notes = JSON.parse(snapshot);
+        showError('Stockage du navigateur plein — retire l’image ou supprime une fiche.');
+        return;
+      }
+      closeEditor();
+      renderGrid();
+      if (currentId) renderDetail();
+    });
+
+    backBtn.addEventListener('click', closeDetail);
+    editBtn.addEventListener('click', function () { if (currentId) openEditor(currentId); });
+    deleteBtn.addEventListener('click', function () {
+      if (!currentId) return;
+      if (!deleteBtn.dataset.armed) {
+        deleteBtn.dataset.armed = '1';
+        deleteBtn.textContent = 'Confirmer la suppression ?';
+        deleteTimer = setTimeout(resetDeleteButton, 3500);
+        return;
+      }
+      notes = notes.filter(function (n) { return n.id !== currentId; });
+      persist();
+      closeDetail();
+      renderGrid();
+    });
+
+    renderGrid();
   })();
 
   // ---- copy wallet address ----
