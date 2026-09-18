@@ -673,12 +673,6 @@
   }
   .note-empty b { color: var(--text-secondary); font-size: 14px; }
   .note-empty[hidden] { display: none; }
-  .note-detail-actions { display: flex; gap: 8px; margin-left: auto; }
-  .note-detail-cover { margin: -4px -4px 16px; border-radius: 12px; overflow: hidden; background: var(--surface-2); }
-  .note-detail-cover[hidden] { display: none; }
-  .note-detail-cover img { width: 100%; max-height: 420px; object-fit: cover; display: block; }
-  .note-detail-name { margin: 0 0 10px; font-size: 19px; font-weight: 700; overflow-wrap: anywhere; }
-  .note-detail-desc { margin: 0; font-size: 13.5px; line-height: 1.65; color: var(--text-secondary); white-space: pre-wrap; overflow-wrap: anywhere; }
   .note-edit-card { max-width: 480px; max-height: calc(100vh - 40px); overflow-y: auto; }
   .note-img-preview { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
   .note-img-preview[hidden] { display: none; }
@@ -687,6 +681,110 @@
   .note-edit-error[hidden] { display: none; }
   @media (max-width: 900px) { .note-grid { grid-template-columns: 1fr 1fr; } }
   @media (max-width: 560px) { .note-grid { grid-template-columns: 1fr; } }
+
+  /* ---------- block note: card dialog (Trello-style) ---------- */
+  .tcard {
+    width: 100%; max-width: 900px; max-height: calc(100vh - 40px); overflow-y: auto; display: flex; flex-direction: column;
+    background: var(--surface-3); border: 1px solid var(--border-strong); border-radius: 14px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.55); font-family: var(--font-display); color: var(--text-primary);
+  }
+  .tcard-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+  .tcard-chip {
+    display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border-strong);
+    background: var(--surface-2); color: var(--text-primary); font-family: var(--font-display); font-size: 12.5px; font-weight: 700;
+    max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: default;
+  }
+  .tcard-chip.is-link { cursor: pointer; }
+  .tcard-chip.is-link:hover { border-color: var(--brand-red); }
+  .tcard-top-actions { display: flex; align-items: center; gap: 8px; }
+  .tcard-icon-btn {
+    width: 30px; height: 30px; border-radius: 8px; border: 1px solid transparent; background: transparent; color: var(--text-secondary);
+    cursor: pointer; font-size: 14px; display: inline-flex; align-items: center; justify-content: center;
+  }
+  .tcard-icon-btn:hover { background: var(--surface-2); color: var(--text-primary); }
+  .tcard-icon-btn:focus-visible, .tcard-pill:focus-visible, .tcard-chip:focus-visible, .tcard-part:focus-visible { outline: 2px solid var(--brand-red); outline-offset: 1px; }
+  .tcard-pill {
+    display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--border-strong);
+    background: var(--surface-2); color: var(--text-secondary); font-family: var(--font-display); font-size: 12.5px; font-weight: 600;
+    cursor: pointer; white-space: nowrap;
+  }
+  .tcard-pill:hover { color: var(--text-primary); border-color: var(--text-secondary); }
+  .tcard-pill[hidden] { display: none; }
+  .tcard-pill.tcard-delete:hover, .tcard-pill.tcard-delete.is-armed { color: var(--critical); border-color: rgba(255,59,70,0.5); }
+
+  .tcard-body { display: grid; grid-template-columns: minmax(0, 1fr) 290px; }
+  .tcard-main { padding: 20px 24px 26px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .tcard-side { padding: 20px 20px 24px; border-left: 1px solid var(--border); background: rgba(0,0,0,0.18); min-width: 0; }
+  .tcard-cover { margin: -4px -4px 14px; border-radius: 10px; overflow: hidden; background: var(--surface-2); }
+  .tcard-cover[hidden] { display: none; }
+  .tcard-cover img { width: 100%; max-height: 300px; object-fit: cover; display: block; }
+  .tcard-title-row { display: flex; align-items: center; gap: 12px; }
+  .tcard-circle { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--text-secondary); flex: none; }
+  .tcard-title {
+    flex: 1; min-width: 0; background: transparent; border: 1px solid transparent; border-radius: 8px; padding: 6px 8px; margin-left: -8px;
+    color: var(--text-primary); font-family: var(--font-display); font-size: 22px; font-weight: 700; outline: none;
+  }
+  .tcard-title:hover { background: var(--surface-2); }
+  .tcard-title:focus { background: var(--surface-2); border-color: var(--brand-red); }
+  .tcard-actions-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 6px 30px; }
+  .tcard-actions-row[hidden] { display: none; }
+
+  .tcard-section { margin-top: 20px; }
+  .tcard-section[hidden] { display: none; }
+  .tcard-section-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; min-height: 30px; }
+  .tcard-section-title { display: inline-flex; align-items: center; gap: 10px; font-size: 14.5px; font-weight: 700; }
+  .tcard-section-title svg { color: var(--text-secondary); flex: none; }
+  .tcard-desc { margin: 0 0 0 26px; font-size: 13.5px; line-height: 1.65; color: var(--text-primary); white-space: pre-wrap; overflow-wrap: anywhere; }
+  .tcard-desc[hidden], .tcard-desc-edit[hidden] { display: none; }
+  .tcard-desc.is-empty {
+    padding: 14px; border-radius: 8px; background: var(--surface-2); color: var(--text-muted); cursor: pointer; white-space: normal;
+  }
+  .tcard-desc.is-empty:hover { color: var(--text-secondary); }
+  .tcard-desc-edit, .tcard-add-form { margin-left: 26px; display: flex; flex-direction: column; gap: 10px; }
+  .tcard-desc-edit[hidden], .tcard-add-form[hidden] { display: none; }
+  .tcard-desc-edit textarea, .tcard-add-form input {
+    width: 100%; background: var(--surface-2); border: 1px solid var(--brand-red); border-radius: 9px; padding: 10px 12px;
+    color: var(--text-primary); font-family: var(--font-display); font-size: 13.5px; line-height: 1.55; outline: none;
+  }
+  .tcard-desc-edit textarea { min-height: 150px; resize: vertical; }
+  .tcard-edit-actions { display: flex; gap: 8px; }
+
+  .tcard-parts { display: flex; flex-direction: column; gap: 8px; margin-left: 26px; }
+  .tcard-parts:empty { display: none; }
+  .tcard-part {
+    display: flex; align-items: center; gap: 10px; width: 100%; padding: 11px 13px; border-radius: 9px; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--text-primary); font-family: var(--font-display); font-size: 13.5px; font-weight: 600;
+    text-align: left; cursor: pointer;
+  }
+  .tcard-part:hover { border-color: var(--brand-red); }
+  .tcard-part-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .tcard-part-icon { color: var(--text-muted); flex: none; display: inline-flex; }
+  .tcard-add-part {
+    display: flex; align-items: center; gap: 8px; margin: 8px 0 0 26px; padding: 9px 12px; border-radius: 9px; width: calc(100% - 26px);
+    border: 1px dashed var(--border-strong); background: transparent; color: var(--text-secondary);
+    font-family: var(--font-display); font-size: 12.5px; font-weight: 600; cursor: pointer;
+  }
+  .tcard-add-part:hover { color: var(--text-primary); border-color: var(--brand-red); background: var(--brand-red-dim); }
+  .tcard-add-part[hidden] { display: none; }
+  .tcard-add-form { margin-top: 8px; }
+
+  .tcard-side-head { display: flex; align-items: center; gap: 10px; font-size: 14.5px; font-weight: 700; margin-bottom: 16px; }
+  .tcard-side-head svg { color: var(--text-secondary); }
+  .tcard-activity { display: flex; flex-direction: column; gap: 14px; }
+  .tcard-act { display: flex; gap: 10px; align-items: flex-start; }
+  .tcard-avatar {
+    width: 26px; height: 26px; border-radius: 50%; flex: none; display: flex; align-items: center; justify-content: center;
+    background: var(--brand-red); color: #fff; font-size: 11px; font-weight: 700;
+  }
+  .tcard-act-text { font-size: 12.5px; line-height: 1.45; color: var(--text-secondary); overflow-wrap: anywhere; }
+  .tcard-act-text b { color: var(--text-primary); }
+  .tcard-act-time { display: block; margin-top: 2px; font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); }
+  .tcard-act-empty { font-size: 12.5px; color: var(--text-muted); }
+  @media (max-width: 720px) {
+    .tcard-body { grid-template-columns: 1fr; }
+    .tcard-side { border-left: none; border-top: 1px solid var(--border); }
+    .tcard-main { padding: 18px 16px 22px; }
+  }
 
   /* ---------- edit config modal ---------- */
   .modal-overlay {
@@ -1448,31 +1546,14 @@
 
   <!-- ============ BLOCK NOTE ============ -->
   <section class="panel" data-panel="notes">
-    <div id="notesListView">
-      <div class="task-toolbar">
-        <button class="toolbar-btn primary" id="noteNewBtn" type="button">＋ Nouvelle fiche</button>
-        <span class="card-hint" id="notesHint">tes propres fiches — nom, image et description</span>
-      </div>
-      <div class="note-grid" id="notesGrid"></div>
-      <div class="note-empty" id="notesEmpty">
-        <b>Aucune fiche pour l'instant</b>
-        <span>Clique sur « Nouvelle fiche » pour créer ta première carte : un nom, une image (facultative) et une description.</span>
-      </div>
+    <div class="task-toolbar">
+      <button class="toolbar-btn primary" id="noteNewBtn" type="button">＋ Nouvelle fiche</button>
+      <span class="card-hint">tes propres fiches — clique sur une fiche pour l'ouvrir</span>
     </div>
-
-    <div id="noteDetailView" hidden>
-      <div class="strat-detail-head">
-        <button class="close-btn" id="noteBackBtn" type="button">✕ Retour</button>
-        <div class="note-detail-actions">
-          <button class="toolbar-btn" id="noteEditBtn" type="button">✎ Modifier</button>
-          <button class="toolbar-btn stop" id="noteDeleteBtn" type="button">Supprimer</button>
-        </div>
-      </div>
-      <div class="card" style="margin-top:0;">
-        <div class="note-detail-cover" id="noteDetailCover" hidden><img id="noteDetailImg" alt=""></div>
-        <h3 class="note-detail-name" id="noteDetailName"></h3>
-        <p class="note-detail-desc" id="noteDetailDesc"></p>
-      </div>
+    <div class="note-grid" id="notesGrid"></div>
+    <div class="note-empty" id="notesEmpty">
+      <b>Aucune fiche pour l'instant</b>
+      <span>Clique sur « Nouvelle fiche » pour créer ta première carte : un nom, une image (facultative) et une description. Tu pourras ensuite y ajouter des sous-parties.</span>
     </div>
   </section>
 
@@ -1503,6 +1584,77 @@
       <button type="submit" class="toolbar-btn primary">Enregistrer</button>
     </div>
   </form>
+</div>
+
+<div class="modal-overlay" id="noteCardModal" hidden>
+  <div class="tcard" role="dialog" aria-modal="true" aria-label="Fiche">
+    <div class="tcard-top">
+      <button type="button" class="tcard-chip" id="tcardChip">Block note</button>
+      <div class="tcard-top-actions">
+        <button type="button" class="tcard-pill tcard-delete" id="tcardDeleteBtn">Supprimer</button>
+        <button type="button" class="tcard-icon-btn" id="tcardCloseBtn" aria-label="Fermer">✕</button>
+      </div>
+    </div>
+    <div class="tcard-body">
+      <div class="tcard-main">
+        <div class="tcard-cover" id="tcardCover" hidden><img id="tcardCoverImg" alt=""></div>
+        <div class="tcard-title-row">
+          <span class="tcard-circle" aria-hidden="true"></span>
+          <input class="tcard-title" id="tcardTitle" type="text" maxlength="80" aria-label="Titre">
+        </div>
+        <div class="tcard-actions-row" id="tcardActionsRow">
+          <button type="button" class="tcard-pill" id="tcardAddPartBtn">＋ Sous-partie</button>
+          <button type="button" class="tcard-pill" id="tcardImgBtn">Image</button>
+          <button type="button" class="tcard-pill" id="tcardImgRemoveBtn" hidden>Retirer l'image</button>
+          <input type="file" id="tcardImgInput" accept="image/*" hidden>
+        </div>
+
+        <div class="tcard-section">
+          <div class="tcard-section-head">
+            <span class="tcard-section-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/></svg>
+              Description
+            </span>
+            <button type="button" class="tcard-pill" id="tcardDescEditBtn">Modifier</button>
+          </div>
+          <div class="tcard-desc" id="tcardDesc"></div>
+          <div class="tcard-desc-edit" id="tcardDescEdit" hidden>
+            <textarea id="tcardDescInput" aria-label="Description" placeholder="Ajoute une description plus détaillée…"></textarea>
+            <div class="tcard-edit-actions">
+              <button type="button" class="toolbar-btn primary" id="tcardDescSave">Enregistrer</button>
+              <button type="button" class="toolbar-btn" id="tcardDescCancel">Annuler</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tcard-section" id="tcardPartsSection">
+          <div class="tcard-section-head">
+            <span class="tcard-section-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="6" rx="1.5"/><rect x="4" y="14" width="16" height="6" rx="1.5"/></svg>
+              Sous-parties <span class="tab-count" id="tcardPartsCount">0</span>
+            </span>
+          </div>
+          <div class="tcard-parts" id="tcardParts"></div>
+          <button type="button" class="tcard-add-part" id="tcardAddPartInlineBtn">＋ Ajouter une sous-partie</button>
+          <div class="tcard-add-form" id="tcardAddForm" hidden>
+            <input type="text" id="tcardAddInput" maxlength="80" placeholder="Nom de la sous-partie…" aria-label="Nom de la sous-partie">
+            <div class="tcard-edit-actions">
+              <button type="button" class="toolbar-btn primary" id="tcardAddConfirm">Ajouter</button>
+              <button type="button" class="toolbar-btn" id="tcardAddCancel">Annuler</button>
+            </div>
+          </div>
+        </div>
+        <span class="note-edit-error" id="tcardError" hidden></span>
+      </div>
+      <aside class="tcard-side">
+        <div class="tcard-side-head">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Activité
+        </div>
+        <div class="tcard-activity" id="tcardActivity"></div>
+      </aside>
+    </div>
+  </div>
 </div>
 
 <div class="modal-overlay" id="taskEditModal" hidden>
@@ -2623,57 +2775,93 @@
     }
   })();
 
-  // ---- block note: user-made cards (name + optional image + description), kept in localStorage ----
+  // ---- block note: user-made cards (name + image + description + sub-parts), kept in localStorage.
+  // Clicking a card opens a Trello-style dialog; a sub-part opens in the same dialog with the parent as a chip. ----
   (function () {
     var STORAGE_KEY = 'b10k_notes';
-    var listView = document.getElementById('notesListView');
-    var detailView = document.getElementById('noteDetailView');
-    var grid = document.getElementById('notesGrid');
-    var emptyEl = document.getElementById('notesEmpty');
-    var tabCount = document.getElementById('notesTabCount');
-    var newBtn = document.getElementById('noteNewBtn');
-    var backBtn = document.getElementById('noteBackBtn');
-    var editBtn = document.getElementById('noteEditBtn');
-    var deleteBtn = document.getElementById('noteDeleteBtn');
-    var detailCover = document.getElementById('noteDetailCover');
-    var detailImg = document.getElementById('noteDetailImg');
-    var detailName = document.getElementById('noteDetailName');
-    var detailDesc = document.getElementById('noteDetailDesc');
-    var modal = document.getElementById('noteEditModal');
-    var form = document.getElementById('noteEditForm');
-    var modalTitle = document.getElementById('noteEditTitle');
-    var nameInput = document.getElementById('noteNameInput');
-    var descInput = document.getElementById('noteDescInput');
-    var imgInput = document.getElementById('noteImgInput');
-    var imgPreview = document.getElementById('noteImgPreview');
-    var imgPreviewImg = document.getElementById('noteImgPreviewImg');
-    var imgRemoveBtn = document.getElementById('noteImgRemoveBtn');
-    var errorEl = document.getElementById('noteEditError');
-    var cancelBtn = document.getElementById('noteCancelBtn');
-    if (!grid || !modal || !form) return;
+    function $(id) { return document.getElementById(id); }
+
+    var grid = $('notesGrid'), emptyEl = $('notesEmpty'), tabCount = $('notesTabCount'), newBtn = $('noteNewBtn');
+    // creation dialog
+    var cModal = $('noteEditModal'), cForm = $('noteEditForm'), cName = $('noteNameInput'), cDesc = $('noteDescInput');
+    var cImgInput = $('noteImgInput'), cImgPreview = $('noteImgPreview'), cImgPreviewImg = $('noteImgPreviewImg');
+    var cImgRemove = $('noteImgRemoveBtn'), cError = $('noteEditError'), cCancel = $('noteCancelBtn');
+    // card dialog
+    var modal = $('noteCardModal'), chip = $('tcardChip'), closeBtn = $('tcardCloseBtn'), deleteBtn = $('tcardDeleteBtn');
+    var cover = $('tcardCover'), coverImg = $('tcardCoverImg'), titleInput = $('tcardTitle'), actionsRow = $('tcardActionsRow');
+    var addPartPill = $('tcardAddPartBtn'), imgBtn = $('tcardImgBtn'), imgRemoveBtn = $('tcardImgRemoveBtn'), imgInput = $('tcardImgInput');
+    var descEl = $('tcardDesc'), descEditWrap = $('tcardDescEdit'), descInput = $('tcardDescInput');
+    var descEditBtn = $('tcardDescEditBtn'), descSave = $('tcardDescSave'), descCancel = $('tcardDescCancel');
+    var partsSection = $('tcardPartsSection'), partsList = $('tcardParts'), partsCount = $('tcardPartsCount');
+    var addOpenBtn = $('tcardAddPartInlineBtn'), addForm = $('tcardAddForm'), addInput = $('tcardAddInput');
+    var addConfirm = $('tcardAddConfirm'), addCancel = $('tcardAddCancel');
+    var activityEl = $('tcardActivity'), errorEl = $('tcardError');
+    if (!grid || !modal || !cForm) return;
 
     var notes = [];
     try {
       var parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
       if (Array.isArray(parsed)) notes = parsed;
     } catch (e) {}
+    notes.forEach(function (n) { if (!Array.isArray(n.parts)) n.parts = []; if (!Array.isArray(n.activity)) n.activity = []; });
 
-    var currentId = null;   // note open in the detail view
-    var editingId = null;   // note being edited (null = creating a new one)
-    var pendingImg = '';    // image data URL currently attached in the editor
+    var state = null;          // { noteId, partId } while the card dialog is open
+    var descEditing = false;
     var deleteTimer = null;
 
     function persist() {
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(notes)); return true; }
       catch (e) { return false; }
     }
+    function uid(prefix) { return prefix + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
     function findNote(id) { return notes.filter(function (n) { return n.id === id; })[0]; }
+    function findPart(n, id) { return n.parts.filter(function (p) { return p.id === id; })[0]; }
+    function addActivity(ent, text) {
+      if (!Array.isArray(ent.activity)) ent.activity = [];
+      ent.activity.push({ t: Date.now(), text: text });
+      if (ent.activity.length > 40) ent.activity.shift();
+    }
+    function showError(msg) { errorEl.textContent = msg || ''; errorEl.hidden = !msg; }
 
-    function showError(msg) {
-      errorEl.textContent = msg || '';
-      errorEl.hidden = !msg;
+    // run a mutation, persist it, and roll back if the browser storage is full
+    function mutate(fn) {
+      var snap = JSON.stringify(notes);
+      fn();
+      if (!persist()) {
+        notes = JSON.parse(snap);
+        showError('Stockage du navigateur plein — retire une image ou supprime une fiche.');
+        return false;
+      }
+      showError('');
+      return true;
     }
 
+    // downscale + re-encode so a few photos don't blow the ~5MB localStorage quota
+    function processImageFile(file, onOk, onFail) {
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onerror = function () { onFail('Impossible de lire ce fichier.'); };
+      reader.onload = function () {
+        var img = new Image();
+        img.onerror = function () { onFail('Ce fichier n’est pas une image lisible.'); };
+        img.onload = function () {
+          var MAX = 900;
+          var scale = Math.min(1, MAX / Math.max(img.width, img.height));
+          var canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(img.width * scale));
+          canvas.height = Math.max(1, Math.round(img.height * scale));
+          var ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#0b0614';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          onOk(canvas.toDataURL('image/jpeg', 0.82));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    /* ---------- grid ---------- */
     var placeholderSvg =
       '<svg class="note-card-placeholder" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">' +
       '<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="9" r="1.6"/><path d="M21 16l-5-5-8 8"/></svg>';
@@ -2686,15 +2874,15 @@
         card.className = 'note-card';
         card.dataset.id = n.id;
 
-        var cover = document.createElement('div');
-        cover.className = 'note-card-cover';
+        var coverEl = document.createElement('div');
+        coverEl.className = 'note-card-cover';
         if (n.img) {
           var img = document.createElement('img');
           img.src = n.img;
           img.alt = '';
-          cover.appendChild(img);
+          coverEl.appendChild(img);
         } else {
-          cover.innerHTML = placeholderSvg;
+          coverEl.innerHTML = placeholderSvg;
         }
 
         var body = document.createElement('div');
@@ -2704,137 +2892,328 @@
         nameEl.textContent = n.name;
         var hint = document.createElement('span');
         hint.className = 'note-card-hint';
-        hint.textContent = 'Cliquer pour la description →';
+        var count = n.parts.length;
+        hint.textContent = count ? count + (count > 1 ? ' sous-parties' : ' sous-partie') + ' · cliquer pour ouvrir →' : 'Cliquer pour ouvrir →';
         body.appendChild(nameEl);
         body.appendChild(hint);
 
-        card.appendChild(cover);
+        card.appendChild(coverEl);
         card.appendChild(body);
-        card.addEventListener('click', function () { openDetail(n.id); });
+        card.addEventListener('click', function () { openCard(n.id); });
         grid.appendChild(card);
       });
       emptyEl.hidden = notes.length > 0;
       if (tabCount) tabCount.textContent = String(notes.length);
     }
 
-    function resetDeleteButton() {
+    /* ---------- card dialog ---------- */
+    function curNote() { return state ? findNote(state.noteId) : null; }
+    function curEntity() {
+      var n = curNote();
+      if (!n) return null;
+      return state.partId ? (findPart(n, state.partId) || n) : n;
+    }
+
+    function resetDelete() {
       clearTimeout(deleteTimer);
       deleteBtn.textContent = 'Supprimer';
+      deleteBtn.classList.remove('is-armed');
       deleteBtn.dataset.armed = '';
     }
 
-    function renderDetail() {
-      var n = findNote(currentId);
-      if (!n) { closeDetail(); return; }
-      detailName.textContent = n.name;
-      detailDesc.textContent = n.desc || 'Pas de description.';
-      if (n.img) { detailImg.src = n.img; detailCover.hidden = false; }
-      else { detailImg.removeAttribute('src'); detailCover.hidden = true; }
+    function fmtDate(t) {
+      try { return new Date(t).toLocaleString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+      catch (e) { return ''; }
     }
 
-    function openDetail(id) {
-      currentId = id;
-      resetDeleteButton();
-      renderDetail();
-      listView.hidden = true;
-      detailView.hidden = false;
-    }
-    function closeDetail() {
-      currentId = null;
-      resetDeleteButton();
-      detailView.hidden = true;
-      listView.hidden = false;
-    }
-
-    function setPendingImg(dataUrl) {
-      pendingImg = dataUrl || '';
-      imgPreview.hidden = !pendingImg;
-      if (pendingImg) imgPreviewImg.src = pendingImg; else imgPreviewImg.removeAttribute('src');
-    }
-
-    function openEditor(id) {
-      editingId = id || null;
-      var n = editingId ? findNote(editingId) : null;
-      modalTitle.textContent = n ? 'Modifier la fiche' : 'Nouvelle fiche';
-      nameInput.value = n ? n.name : '';
-      descInput.value = n ? n.desc : '';
-      imgInput.value = '';
-      setPendingImg(n ? n.img : '');
-      showError('');
-      modal.hidden = false;
-      nameInput.focus();
-    }
-    function closeEditor() { modal.hidden = true; }
-
-    // downscale + re-encode so a few photos don't blow the ~5MB localStorage quota
-    function processImageFile(file) {
-      if (!file) return;
-      var reader = new FileReader();
-      reader.onerror = function () { showError('Impossible de lire ce fichier.'); };
-      reader.onload = function () {
-        var img = new Image();
-        img.onerror = function () { showError('Ce fichier n’est pas une image lisible.'); };
-        img.onload = function () {
-          var MAX = 900;
-          var scale = Math.min(1, MAX / Math.max(img.width, img.height));
-          var canvas = document.createElement('canvas');
-          canvas.width = Math.max(1, Math.round(img.width * scale));
-          canvas.height = Math.max(1, Math.round(img.height * scale));
-          var ctx = canvas.getContext('2d');
-          ctx.fillStyle = '#0b0614';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          showError('');
-          setPendingImg(canvas.toDataURL('image/jpeg', 0.82));
-        };
-        img.src = reader.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    newBtn.addEventListener('click', function () { openEditor(null); });
-    cancelBtn.addEventListener('click', closeEditor);
-    modal.addEventListener('click', function (evt) { if (evt.target === modal) closeEditor(); });
-    document.addEventListener('keydown', function (evt) { if (evt.key === 'Escape' && !modal.hidden) closeEditor(); });
-    imgInput.addEventListener('change', function () { processImageFile(imgInput.files && imgInput.files[0]); });
-    imgRemoveBtn.addEventListener('click', function () { imgInput.value = ''; setPendingImg(''); });
-
-    form.addEventListener('submit', function (evt) {
-      evt.preventDefault();
-      var name = nameInput.value.trim();
-      if (!name) { showError('Donne un nom à la fiche.'); return; }
-      var snapshot = JSON.stringify(notes);
-      var target = editingId ? findNote(editingId) : null;
-      if (target) {
-        target.name = name; target.desc = descInput.value; target.img = pendingImg;
-      } else {
-        target = { id: 'n_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: name, desc: descInput.value, img: pendingImg };
-        notes.push(target);
-      }
-      if (!persist()) {
-        notes = JSON.parse(snapshot);
-        showError('Stockage du navigateur plein — retire l’image ou supprime une fiche.');
+    function renderActivity(ent) {
+      activityEl.innerHTML = '';
+      var list = (ent.activity || []).slice().reverse();
+      if (!list.length) {
+        var none = document.createElement('div');
+        none.className = 'tcard-act-empty';
+        none.textContent = 'Aucune activité enregistrée.';
+        activityEl.appendChild(none);
         return;
       }
-      closeEditor();
-      renderGrid();
-      if (currentId) renderDetail();
+      list.forEach(function (a) {
+        var row = document.createElement('div');
+        row.className = 'tcard-act';
+        var av = document.createElement('span');
+        av.className = 'tcard-avatar';
+        av.textContent = 'T';
+        var txt = document.createElement('div');
+        txt.className = 'tcard-act-text';
+        var who = document.createElement('b');
+        who.textContent = 'Toi';
+        txt.appendChild(who);
+        txt.appendChild(document.createTextNode(' ' + a.text));
+        var time = document.createElement('span');
+        time.className = 'tcard-act-time';
+        time.textContent = fmtDate(a.t);
+        txt.appendChild(time);
+        row.appendChild(av);
+        row.appendChild(txt);
+        activityEl.appendChild(row);
+      });
+    }
+
+    function renderCard() {
+      var n = curNote();
+      if (!n) { closeCard(); return; }
+      var part = state.partId ? findPart(n, state.partId) : null;
+      if (state.partId && !part) state.partId = null;
+      var ent = part || n;
+      var isPart = !!part;
+
+      chip.textContent = isPart ? '‹ ' + n.name : 'Block note';
+      chip.classList.toggle('is-link', isPart);
+      chip.disabled = !isPart;
+
+      cover.hidden = isPart || !n.img;
+      if (!cover.hidden) coverImg.src = n.img; else coverImg.removeAttribute('src');
+
+      if (document.activeElement !== titleInput) titleInput.value = ent.name;
+
+      actionsRow.hidden = isPart;
+      imgBtn.textContent = n.img ? 'Changer l’image' : 'Image';
+      imgRemoveBtn.hidden = !n.img;
+
+      if (ent.desc) { descEl.textContent = ent.desc; descEl.classList.remove('is-empty'); }
+      else { descEl.textContent = 'Ajouter une description plus détaillée…'; descEl.classList.add('is-empty'); }
+      descEl.hidden = descEditing;
+      descEditBtn.hidden = descEditing;
+      descEditWrap.hidden = !descEditing;
+
+      partsSection.hidden = isPart;
+      if (!isPart) {
+        partsCount.textContent = String(n.parts.length);
+        partsList.innerHTML = '';
+        n.parts.forEach(function (p) {
+          var row = document.createElement('button');
+          row.type = 'button';
+          row.className = 'tcard-part';
+          var nm = document.createElement('span');
+          nm.className = 'tcard-part-name';
+          nm.textContent = p.name;
+          row.appendChild(nm);
+          if (p.desc) {
+            var ic = document.createElement('span');
+            ic.className = 'tcard-part-icon';
+            ic.title = 'Cette sous-partie a une description';
+            ic.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="14" y2="17"/></svg>';
+            row.appendChild(ic);
+          }
+          row.addEventListener('click', function () { openPart(p.id); });
+          partsList.appendChild(row);
+        });
+      }
+      renderActivity(ent);
+    }
+
+    function scrollDialogTop() { modal.querySelector('.tcard').scrollTop = 0; }
+
+    function openCard(id) {
+      state = { noteId: id, partId: null };
+      descEditing = false;
+      addForm.hidden = true; addOpenBtn.hidden = false;
+      showError('');
+      resetDelete();
+      modal.hidden = false;
+      renderCard();
+      scrollDialogTop();
+    }
+    function closeCard() {
+      modal.hidden = true;
+      state = null;
+      descEditing = false;
+      resetDelete();
+    }
+    function openPart(partId) {
+      state.partId = partId;
+      descEditing = false;
+      addForm.hidden = true; addOpenBtn.hidden = false;
+      showError('');
+      resetDelete();
+      renderCard();
+      scrollDialogTop();
+    }
+    function backToNote() {
+      if (!state || !state.partId) return;
+      state.partId = null;
+      descEditing = false;
+      resetDelete();
+      renderCard();
+    }
+
+    chip.addEventListener('click', backToNote);
+    closeBtn.addEventListener('click', closeCard);
+    modal.addEventListener('click', function (evt) { if (evt.target === modal) closeCard(); });
+
+    // title: saves on blur / Enter
+    titleInput.addEventListener('keydown', function (evt) { if (evt.key === 'Enter') { evt.preventDefault(); titleInput.blur(); } });
+    titleInput.addEventListener('change', function () {
+      var ent = curEntity();
+      if (!ent) return;
+      var v = titleInput.value.trim();
+      if (!v || v === ent.name) { titleInput.value = ent.name; return; }
+      mutate(function () { ent.name = v; addActivity(ent, 'a renommé en « ' + v + ' »'); });
+      renderCard(); renderGrid();
     });
 
-    backBtn.addEventListener('click', closeDetail);
-    editBtn.addEventListener('click', function () { if (currentId) openEditor(currentId); });
+    // description
+    function startDescEdit() {
+      var ent = curEntity();
+      if (!ent) return;
+      descEditing = true;
+      descInput.value = ent.desc || '';
+      renderCard();
+      descInput.focus();
+    }
+    descEditBtn.addEventListener('click', startDescEdit);
+    descEl.addEventListener('click', function () { if (descEl.classList.contains('is-empty')) startDescEdit(); });
+    descCancel.addEventListener('click', function () { descEditing = false; renderCard(); });
+    function saveDesc() {
+      var ent = curEntity();
+      if (!ent) return;
+      var v = descInput.value;
+      if (v !== (ent.desc || '')) {
+        mutate(function () { ent.desc = v; addActivity(ent, v.trim() ? 'a modifié la description' : 'a supprimé la description'); });
+      }
+      descEditing = false;
+      renderCard(); renderGrid();
+    }
+    descSave.addEventListener('click', saveDesc);
+    descInput.addEventListener('keydown', function (evt) { if (evt.key === 'Enter' && (evt.ctrlKey || evt.metaKey)) { evt.preventDefault(); saveDesc(); } });
+
+    // image (cards only)
+    imgBtn.addEventListener('click', function () { imgInput.click(); });
+    imgInput.addEventListener('change', function () {
+      var file = imgInput.files && imgInput.files[0];
+      imgInput.value = '';
+      processImageFile(file, function (dataUrl) {
+        var n = curNote();
+        if (!n) return;
+        var had = !!n.img;
+        mutate(function () { n.img = dataUrl; addActivity(n, had ? 'a changé l’image' : 'a ajouté une image'); });
+        renderCard(); renderGrid();
+      }, showError);
+    });
+    imgRemoveBtn.addEventListener('click', function () {
+      var n = curNote();
+      if (!n || !n.img) return;
+      mutate(function () { n.img = ''; addActivity(n, 'a retiré l’image'); });
+      renderCard(); renderGrid();
+    });
+
+    // sub-parts
+    function showAddForm() {
+      addForm.hidden = false; addOpenBtn.hidden = true;
+      addInput.value = '';
+      addForm.scrollIntoView({ block: 'nearest' });
+      addInput.focus();
+    }
+    function hideAddForm() { addForm.hidden = true; addOpenBtn.hidden = false; }
+    function confirmAdd() {
+      var n = curNote();
+      if (!n || state.partId) return;
+      var name = addInput.value.trim();
+      if (!name) { addInput.focus(); return; }
+      mutate(function () {
+        var part = { id: uid('p_'), name: name, desc: '', activity: [] };
+        addActivity(part, 'a créé cette sous-partie');
+        n.parts.push(part);
+        addActivity(n, 'a ajouté la sous-partie « ' + name + ' »');
+      });
+      addInput.value = '';
+      renderCard(); renderGrid();
+      addInput.focus();
+    }
+    addPartPill.addEventListener('click', showAddForm);
+    addOpenBtn.addEventListener('click', showAddForm);
+    addCancel.addEventListener('click', hideAddForm);
+    addConfirm.addEventListener('click', confirmAdd);
+    addInput.addEventListener('keydown', function (evt) { if (evt.key === 'Enter') { evt.preventDefault(); confirmAdd(); } });
+
+    // delete (two clicks to confirm)
     deleteBtn.addEventListener('click', function () {
-      if (!currentId) return;
+      var n = curNote();
+      if (!n) return;
       if (!deleteBtn.dataset.armed) {
         deleteBtn.dataset.armed = '1';
-        deleteBtn.textContent = 'Confirmer la suppression ?';
-        deleteTimer = setTimeout(resetDeleteButton, 3500);
+        deleteBtn.classList.add('is-armed');
+        deleteBtn.textContent = 'Confirmer ?';
+        deleteTimer = setTimeout(resetDelete, 3500);
         return;
       }
-      notes = notes.filter(function (n) { return n.id !== currentId; });
-      persist();
-      closeDetail();
+      resetDelete();
+      if (state.partId) {
+        var partId = state.partId;
+        var part = findPart(n, partId);
+        mutate(function () {
+          n.parts = n.parts.filter(function (p) { return p.id !== partId; });
+          addActivity(n, 'a supprimé la sous-partie « ' + (part ? part.name : '') + ' »');
+        });
+        state.partId = null;
+        renderCard(); renderGrid();
+      } else {
+        mutate(function () { notes = notes.filter(function (x) { return x.id !== n.id; }); });
+        closeCard();
+        renderGrid();
+      }
+    });
+
+    /* ---------- creation dialog ---------- */
+    var pendingImg = '';
+    function setPendingImg(dataUrl) {
+      pendingImg = dataUrl || '';
+      cImgPreview.hidden = !pendingImg;
+      if (pendingImg) cImgPreviewImg.src = pendingImg; else cImgPreviewImg.removeAttribute('src');
+    }
+    function showCreateError(msg) { cError.textContent = msg || ''; cError.hidden = !msg; }
+    function openCreate() {
+      $('noteEditTitle').textContent = 'Nouvelle fiche';
+      cName.value = ''; cDesc.value = ''; cImgInput.value = '';
+      setPendingImg('');
+      showCreateError('');
+      cModal.hidden = false;
+      cName.focus();
+    }
+    function closeCreate() { cModal.hidden = true; }
+
+    newBtn.addEventListener('click', openCreate);
+    cCancel.addEventListener('click', closeCreate);
+    cModal.addEventListener('click', function (evt) { if (evt.target === cModal) closeCreate(); });
+    cImgInput.addEventListener('change', function () {
+      processImageFile(cImgInput.files && cImgInput.files[0], function (d) { showCreateError(''); setPendingImg(d); }, showCreateError);
+    });
+    cImgRemove.addEventListener('click', function () { cImgInput.value = ''; setPendingImg(''); });
+    cForm.addEventListener('submit', function (evt) {
+      evt.preventDefault();
+      var name = cName.value.trim();
+      if (!name) { showCreateError('Donne un nom à la fiche.'); return; }
+      var snap = JSON.stringify(notes);
+      var note = { id: uid('n_'), name: name, desc: cDesc.value, img: pendingImg, parts: [], activity: [] };
+      addActivity(note, 'a créé cette fiche');
+      notes.push(note);
+      if (!persist()) {
+        notes = JSON.parse(snap);
+        showCreateError('Stockage du navigateur plein — retire l’image ou supprime une fiche.');
+        return;
+      }
+      closeCreate();
       renderGrid();
+    });
+
+    // Escape: cancel the innermost thing first
+    document.addEventListener('keydown', function (evt) {
+      if (evt.key !== 'Escape') return;
+      if (!cModal.hidden) { closeCreate(); return; }
+      if (modal.hidden) return;
+      if (descEditing) { descEditing = false; renderCard(); return; }
+      if (!addForm.hidden) { hideAddForm(); return; }
+      if (state && state.partId) { backToNote(); return; }
+      closeCard();
     });
 
     renderGrid();

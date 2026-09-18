@@ -60,12 +60,15 @@ design n'est pas figé — pas de branchement sur le vrai bot pour l'instant, vo
 3. **Importation** — catalogue de stratégies "backtestées" (mock), voir détail plus bas.
 4. **Tâches** — liste des configs de copy-trade (une carte par wallet/stratégie).
 5. **Activité** — journal compact des décisions du bot (BUY/SKIP/TP/SL).
-6. **Block note** — fiches créées et personnalisées par l'utilisateur (nom + image
-   facultative + description). Bouton « Nouvelle fiche » → carte visible dans la grille
-   avec son nom et son image ; clic = vue détail (description), avec Modifier /
-   Supprimer (confirmation en 2 clics). Stocké en `localStorage` (clé `b10k_notes`,
-   propre à chaque navigateur, pas synchronisé). Les images sont réduites à 900px max
-   et ré-encodées en JPEG avant stockage pour ne pas saturer le quota (~5 Mo).
+6. **Block note** — fiches créées et personnalisées par l'utilisateur, façon Trello.
+   Bouton « Nouvelle fiche » (nom + image facultative + description) → carte dans la grille
+   avec son nom et son image. Cliquer une fiche ouvre une fenêtre style carte Trello : titre
+   modifiable, bloc Description avec « Modifier », bouton Image, **sous-parties** (chacune avec
+   son nom et sa description, ouverte dans la même fenêtre avec le nom de la fiche en pastille
+   pour revenir), panneau **Activité** à droite (créations, renommages, descriptions…) et
+   Supprimer en 2 clics. Stocké en `localStorage` (clé `b10k_notes`, propre à chaque
+   navigateur, pas synchronisé). Images réduites à 900px max et ré-encodées en JPEG avant
+   stockage pour ne pas saturer le quota (~5 Mo).
 
 (L'onglet "Positions" a été supprimé : il faisait doublon avec le détail par
 stratégie et n'incluait pas la stratégie legacy — jugé inutile dans sa forme.)
